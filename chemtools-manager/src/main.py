@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
     logging.config.dictConfig(utils.load_yml("conf/logging.yml"))
 
     container = ApplicationContainer()
-    container.wire(modules=["api.controllers.charge_controller"])
+    container.wire(modules=["api.controllers.charge_controller", "api.controllers.io_controller"])
     yield
 
 

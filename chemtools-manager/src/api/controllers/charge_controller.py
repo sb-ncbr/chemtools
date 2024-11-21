@@ -25,12 +25,10 @@ class ChargeController:
     async def charge_calculation(
         self,
         data: ChargeRequest,
-        chargefw2_tool: ChargeFW2Tool = Depends(Provide[ApplicationContainer.chargefw2_tool]),
     ) -> ChargeMethodsResponse:
-        chargefw2_output = self.__chargefw2_tool.run(data.mode)
-        from pprint import pprint
-
-        pprint(chargefw2_output)
+        calculation_token = str(uuid.uuid4())
+        # TODO make this async
+        chargefw2_output = self.__chargefw2_tool.run(data.mode, token=calculation_token)
         suitable_methods = self.__chargefw2_tool.calculate_suitable_methods(chargefw2_output)
         # uuid_str = str(uuid.uuid4())
         return suitable_methods

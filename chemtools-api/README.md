@@ -9,3 +9,15 @@
 ```bash
 docker compose up --build
 ```
+
+
+## TODOs
+
+- install isort, precommit hook
+- push to ncbr repo (maybe use gitmodules to have them together on my gitlab)
+- auth + MUNI jednotne prihlaseni
+- add cron health check tests which check whether charge works (on small molecule file)
+
+- Mole - mono
+    - create dockerfile for mole using mono
+    - mole is using xml for input

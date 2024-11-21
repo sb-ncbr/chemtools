@@ -5,7 +5,6 @@ from logging import Logger
 import docker
 from fastapi import HTTPException
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -31,15 +30,24 @@ class BaseDockerizedTool(abc.ABC):
     def get_docker_run_kwargs(self, *args, **kwargs) -> dict:
         return self.docker_run_kwargs
 
+    def preprocess(self, *args, **kwargs):
+        pass
+
+    def postprocess(self, *args, _output: bytes, **kwargs):
+        return _output.decode("utf-8")
+
     def run(self, *args, **kwargs) -> str:
+        print(args, kwargs)
+        self.preprocess(*args, **kwargs)
         try:
             output = self._docker.containers.run(
                 self.image_name,
                 self.get_cmd_params(*args, **kwargs),
                 **({"detach": True} | self.get_docker_run_kwargs(*args, **kwargs)),
             )
+            self.postprocess(_output=output, *args, **kwargs)
         except docker.errors.ContainerError as e:
             self._logger.error(f"ContainerError: {e}")
             raise HTTPException(status_code=400, detail=f"Charge calculation failed: {e.stderr.decode("utf-8")}")
 
-        return output.decode("utf-8")
+        return output

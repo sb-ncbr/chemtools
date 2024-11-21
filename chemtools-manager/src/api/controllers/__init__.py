@@ -1,6 +1,7 @@
 from api.controllers.charge_controller import ChargeController, charge_router
-from api.controllers.index_controller import IndexController, index_router
+from api.controllers.system_controller import SystemController, system_router
+from api.controllers.io_controller import IOController, io_router
 
-router_list = [index_router, charge_router]
+router_list = [system_router, io_router, charge_router]
 
-__all__ = ["ChargeController", "IndexController", "router_list"]
+__all__ = ["router_list", "ChargeController", "SystemController" "IOController"]

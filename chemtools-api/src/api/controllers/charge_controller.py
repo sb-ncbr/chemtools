@@ -24,7 +24,7 @@ class ChargeController:
     ):
         self.__chemtools_manager_client = chemtools_manager_client
 
-    @charge_router.post("/charge_calculation/")
+    @charge_router.post("/charge_calculation")
     async def charge_calculation(self, data: ChargeRequest) -> ChargeMethodsResponse:
         response = await self.__chemtools_manager_client.chargefw2(data)
         return response

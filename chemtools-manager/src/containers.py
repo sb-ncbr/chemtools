@@ -4,7 +4,7 @@ from dependency_injector import containers, providers
 import docker
 
 import services
-from tools import ChargeFW2Tool
+import tools
 
 
 class ApplicationContainer(containers.DeclarativeContainer):
@@ -14,7 +14,7 @@ class ApplicationContainer(containers.DeclarativeContainer):
     docker = providers.Singleton(docker.from_env)
 
     storage_service = providers.Singleton(
-        services.FileStorageService,
+        services.FilesystemStorageService,
     )
 
-    chargefw2_tool = providers.Singleton(ChargeFW2Tool, docker=docker, logger=logger)
+    chargefw2_tool = providers.Singleton(tools.ChargeFW2Tool, docker=docker, logger=logger)
