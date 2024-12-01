@@ -4,6 +4,7 @@ from dependency_injector import containers, providers
 import docker
 
 import services
+import clients
 import tools
 
 
@@ -13,8 +14,15 @@ class ApplicationContainer(containers.DeclarativeContainer):
 
     docker = providers.Singleton(docker.from_env)
 
-    storage_service = providers.Singleton(
-        services.FilesystemStorageService,
+    file_storage_service = providers.Singleton(services.FilesystemStorageService, logger=logger)
+
+    online_file_fetcher_client = providers.Singleton(
+        clients.OnlineFileFetcherClient, storage_service=file_storage_service, logger=logger
+    )
+
+    online_file_fetcher_service = providers.Singleton(
+        services.OnlineFileFetcherService, fetcher_client=online_file_fetcher_client
     )
 
     chargefw2_tool = providers.Singleton(tools.ChargeFW2Tool, docker=docker, logger=logger)
+    mole2_tool = providers.Singleton(tools.Mole2Tool, docker=docker, logger=logger)

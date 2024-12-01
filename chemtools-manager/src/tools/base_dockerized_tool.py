@@ -1,6 +1,7 @@
 import abc
 import logging
 from logging import Logger
+import os
 
 import docker
 from fastapi import HTTPException
@@ -30,14 +31,13 @@ class BaseDockerizedTool(abc.ABC):
     def get_docker_run_kwargs(self, *args, **kwargs) -> dict:
         return self.docker_run_kwargs
 
-    def preprocess(self, *args, **kwargs):
-        pass
+    def preprocess(self, *args, token: str, **kwargs):
+        os.makedirs(os.path.abspath(f"../data/docker/{self.image_name}/{token}"), exist_ok=True)
 
     def postprocess(self, *args, _output: bytes, **kwargs):
         return _output.decode("utf-8")
 
     def run(self, *args, **kwargs) -> str:
-        print(args, kwargs)
         self.preprocess(*args, **kwargs)
         try:
             output = self._docker.containers.run(
@@ -48,6 +48,6 @@ class BaseDockerizedTool(abc.ABC):
             self.postprocess(_output=output, *args, **kwargs)
         except docker.errors.ContainerError as e:
             self._logger.error(f"ContainerError: {e}")
-            raise HTTPException(status_code=400, detail=f"Charge calculation failed: {e.stderr.decode("utf-8")}")
+            raise HTTPException(status_code=400, detail=self.get_error(e.stderr.decode("utf-8")))
 
         return output

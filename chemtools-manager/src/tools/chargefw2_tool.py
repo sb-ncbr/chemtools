@@ -8,24 +8,25 @@ from tools import BaseDockerizedTool
 
 class ChargeFW2Tool(BaseDockerizedTool):
     image_name = "chargefw2"
+    docker_run_kwargs = {
+        "volumes": {os.path.abspath("../data/docker/chargefw2"): {"bind": "/data", "mode": "rw"}},
+        "detach": False,
+    }
 
     def get_cmd_params(self, mode: ChargeModeEnum, token: str) -> str:
-        in_path = os.path.abspath("/data/chargefw2/molecules.sdf")
-        out_path = os.path.abspath(f"/data/chargefw2/{token}")
+        in_path = os.path.abspath("/data/molecules.sdf")
+        out_path = os.path.abspath(f"/data/{token}")
         return {
-            ChargeModeEnum.charges: f"--mode {mode.value} --input-file {in_path} --chg-out-dir {out_path}",
-            ChargeModeEnum.suitable_methods: f"--mode {mode.value} --input-file {in_path} --read-hetatm --permissive-types",
+            ChargeModeEnum.charges: f"--mode {mode} --input-file {in_path} --chg-out-dir {out_path}",
+            ChargeModeEnum.suitable_methods: f"--mode {mode} --input-file {in_path} --read-hetatm --permissive-types",
         }.get(mode, "--help")
-
-    def get_docker_run_kwargs(self, *args, **kwargs):
-        return {"volumes": {os.path.abspath("../data/docker"): {"bind": "/data", "mode": "rw"}}, "detach": False}
 
     def postprocess(self, *args, _output: bytes, **kwargs):
         print(_output, args, kwargs)
         return super().postprocess(*args, _output=_output, **kwargs)
 
-    def preprocess(self, *args, token: str, **kwargs):
-        os.makedirs(os.path.abspath(f"../data/docker/chargefw2/{token}"), exist_ok=True)
+    def get_error(self, msg):
+        return f"ChargeFW2 calculation failed: {msg}"
 
     @staticmethod
     def calculate_suitable_methods(calculation: str) -> ChargeMethodsResponse:

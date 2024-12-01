@@ -9,12 +9,12 @@ system_router = APIRouter(tags=["System"])
 class SystemController:
     @system_router.get("/", response_class=HTMLResponse)
     async def index(self, request: Request):
-        return f'''
+        return f"""
         <html>
             <h1>Chemtools Manager root</h1>
             <a href="{request.url}docs">Try API here</a>
         </html>
-        '''
+        """
 
     @system_router.get("/health")
     async def health(self):

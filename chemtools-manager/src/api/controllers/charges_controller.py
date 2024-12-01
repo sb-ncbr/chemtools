@@ -1,27 +1,27 @@
 import uuid
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from fastapi_utils.cbv import cbv
 
-from dependency_injector.wiring import Provide, inject
+from dependency_injector.wiring import inject
 
 from api.models import ChargeMethodsResponse, ChargeRequest
-from containers import ApplicationContainer
 from tools import ChargeFW2Tool
+from utils import from_app_container
 
 
-charge_router = APIRouter(tags=["Charge"])
+charges_router = APIRouter(tags=["Charges"])
 
 
-@cbv(charge_router)
-class ChargeController:
+@cbv(charges_router)
+class ChargesController:
     @inject
     def __init__(
         self,
-        chargefw2_tool: ChargeFW2Tool = Depends(Provide[ApplicationContainer.chargefw2_tool]),
+        chargefw2_tool: ChargeFW2Tool = from_app_container("chargefw2_tool"),
     ):
         self.__chargefw2_tool = chargefw2_tool
 
-    @charge_router.post("/chargefw2/")
+    @charges_router.post("/chargefw2/")
     async def charge_calculation(
         self,
         data: ChargeRequest,
