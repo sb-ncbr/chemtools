@@ -1,26 +1,51 @@
-[tool.poetry]
+[project]
 name = "chemtools-manager"
-version = "0.1.0"
-description = "Chemtools Manager"
-authors = ["silox <edruisl99@gmail.com>"]
-license = "MIT"
+dynamic = [ "version" ]
+authors = [
+    {name = "silox",email = "edruisl99@gmail.com"}
+]
+license = {text = "MIT"}
 readme = "README.md"
+dependencies = [
+    "fastapi[standard] (>=0.115.6,<0.116.0)",
+    "python-multipart (>=0.0.20,<0.0.21)",
+    "uvicorn[standard] (>=0.34.0,<0.35.0)",
+    "docker (>=7.1.0,<8.0.0)",
+    "dependency-injector (>=4.45.0,<5.0.0)",
+    "pyyaml (>=6.0.2,<7.0.0)",
+    "fastapi-utils (>=0.8.0,<0.9.0)",
+    "aiofiles (>=24.1.0,<25.0.0)",
+    "lxml (>=5.3.0,<6.0.0)",
+    "pydantic-xml (>=2.14.1,<3.0.0)",
+    "typing-inspect (>=0.9.0,<0.10.0)"
+]
+
+[tool.poetry]
+version = "0.1.0"
 package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
-fastapi = {extras = ["standard"], version = "^0.115.0"}
-python-multipart = "^0.0.10"
-uvicorn = {extras = ["standard"], version = "^0.31.0"}
-docker = "^7.1.0"
-dependency-injector = "^4.43.0"
-pyyaml = "^6.0.2"
-fastapi-utils = "^0.8.0"
-typing-inspect = "^0.9.0"
-aiofiles = "^24.1.0"
-lxml = "^5.3.0"
 
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.9.0"
+mypy = "^1.14.1"
+pytest = "^8.3.4"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+# Selected tools
+# Pyflakes - F
+# pycodestyle - E, W
+# flake8-buildins - A
+# isort - I
+# pylint - PLC, PLE, PLR, PLW
+select = ["F", "E", "W", "A", "I", "PLC", "PLE", "PLR", "PLW"]
+ignore = ["PLR0913", "PLR2004"]

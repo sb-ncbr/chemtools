@@ -5,7 +5,7 @@ from pydantic import BaseModel, field_validator
 from api.enums import MoleculeFileExtensionEnum, MoleculeRepoSiteEnum
 
 
-class FetchOnlineFileRequest(BaseModel):
+class FetchOnlineFileRequestDto(BaseModel):
     molecule_id: str
     site: MoleculeRepoSiteEnum
     extension: MoleculeFileExtensionEnum
@@ -18,5 +18,5 @@ class FetchOnlineFileRequest(BaseModel):
         return v
 
 
-class FetchOnlineFileResponse(BaseModel):
+class FetchOnlineFileResponseDto(BaseModel):
     token: uuid.UUID

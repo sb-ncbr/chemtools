@@ -3,14 +3,15 @@ disable_existing_loggers: False
 
 formatters:
   default:
-    format: "[%(asctime)s] %(levelname)8s | %(name)s: %(message)s"
+    format: "[{asctime}] {levelname:<8s} | chemtools_manager.{name}:{lineno} - {message}"
     datefmt: "%Y-%m-%d %H:%M:%S"
+    style: "{"
 
 handlers:
   console:
     class: logging.StreamHandler
     formatter: default
-    level: INFO
+    level: DEBUG
 
   file:
     class: logging.FileHandler

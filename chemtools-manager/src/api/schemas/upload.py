@@ -1,11 +1,12 @@
 import uuid
+
 from fastapi import UploadFile
 from pydantic import BaseModel
 
 
-class UploadRequest(BaseModel):
+class UploadRequestDto(BaseModel):
     files: list[UploadFile]
 
 
-class UploadResponse(BaseModel):
-    token: uuid.UUID
+class UploadResponseDto(BaseModel):
+    tokens: list[uuid.UUID]

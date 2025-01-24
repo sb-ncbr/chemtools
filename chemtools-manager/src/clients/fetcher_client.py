@@ -1,39 +1,37 @@
 import logging
-from typing import TYPE_CHECKING
 import uuid
+from typing import TYPE_CHECKING
 
 import httpx
-
 from fastapi import HTTPException, status
 
-
 if TYPE_CHECKING:
+    from api.schemas.online_fetch import FetchOnlineFileRequestDto
     from services import FileStorageService
-    from api.models import FetchOnlineFileRequest
+
+logger = logging.getLogger(__name__)
 
 
 class OnlineFileFetcherClient:
-    def __init__(self, storage_service: 'FileStorageService', logger: logging.Logger):
+    def __init__(self, storage_service: 'FileStorageService'):
         self.__storage_service = storage_service
-        self._logger = logger
 
-    async def fetch_from(self, site_url: str, data: 'FetchOnlineFileRequest') -> uuid.UUID:
+    async def fetch_from(self, site_url: str, data: 'FetchOnlineFileRequestDto') -> uuid.UUID:
         data_bytes = await self._download(site_url.format(**data.model_dump()))
-        token = uuid.uuid4()
         file_name = f"{data.molecule_id}.{data.extension}"
-        await self.__storage_service.save_file(token, file_name, data_bytes)
+        token = await self.__storage_service.save_file(file_name, data_bytes)
         return token
 
     async def _download(self, full_url: str) -> dict:
-        self._logger.info(f"Downloading file from url={full_url}")
+        logger.info(f"Downloading file from url={full_url}")
         async with httpx.AsyncClient() as client:
             response = await client.get(full_url)
             if not response.is_success:
                 if response.status_code == status.HTTP_404_NOT_FOUND:
-                    self._logger.error(f"File cannot be fetched from url={full_url}")
+                    logger.error(f"File cannot be fetched from url={full_url}")
                     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
-                self._logger.error(f"Request failed with status code {response.status_code}")
+                logger.error(f"Request failed with status code {response.status_code}")
                 raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Service unavailable")
 
             return response.content

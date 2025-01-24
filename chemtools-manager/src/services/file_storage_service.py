@@ -1,18 +1,17 @@
 import abc
 import logging
-from typing import Callable
 import uuid
+from typing import Callable
 from zipfile import ZipFile
 
 from fastapi import File
 
-from api.models import UploadRequest
+from api.schemas.upload import UploadRequestDto
+
+logger = logging.getLogger(__name__)
 
 
 class FileStorageService(abc.ABC):
-    def __init__(self, logger: logging.Logger):
-        self._logger = logger
-
     def unzip_files(self, file: File) -> dict[str, Callable[[str], bytes]]:
         zip_file = ZipFile(file)
         # .read() surrounded in lambda to avoid storing all file contents in memory.
@@ -20,13 +19,13 @@ class FileStorageService(abc.ABC):
         return {name: lambda name=name: zip_file.read(name) for name in zip_file.namelist()}
 
     @abc.abstractmethod
-    async def upload_files(self, data: UploadRequest) -> uuid.UUID:
+    async def upload_files(self, data: UploadRequestDto) -> list[uuid.UUID]:
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def save_file(self, token: uuid.UUID, file_name: str, file_bytes: bytes) -> None:
+    async def save_file(self, file_name: str, file_bytes: bytes, token: uuid.UUID | None = None) -> uuid.UUID:
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def fetch_files(self, token: uuid.UUID):
+    async def fetch_file(self, file_name: str) -> bytes:
         raise NotImplementedError

@@ -1,12 +1,13 @@
 from typing import Annotated
+
+from dependency_injector.wiring import inject
 from fastapi import APIRouter, File
 from fastapi_utils.cbv import cbv
 
-from dependency_injector.wiring import inject
-from api.enums import MoleculeRepoSiteEnum, MoleculeFileExtensionEnum
-from api.models import UploadRequest, UploadResponse, FetchOnlineFileRequest, FetchOnlineFileResponse
-from services import FileStorageService
-from services import OnlineFileFetcherService
+from api.enums import MoleculeFileExtensionEnum, MoleculeRepoSiteEnum
+from api.schemas.online_fetch import FetchOnlineFileRequestDto, FetchOnlineFileResponseDto
+from api.schemas.upload import UploadRequestDto, UploadResponseDto
+from services import FileStorageService, OnlineFileFetcherService
 from utils import from_app_container
 
 io_router = APIRouter(tags=["I/O"])
@@ -24,9 +25,9 @@ class IOController:
         self.__fetcher_service = fetcher_service
 
     @io_router.post("/custom_files/")
-    async def upload_custom_files(self, data: Annotated[UploadRequest, File()]) -> UploadResponse:
-        token = await self.__storage_service.upload_files(data)
-        return UploadResponse(token=token)
+    async def upload_custom_files(self, data: Annotated[UploadRequestDto, File()]) -> UploadResponseDto:
+        file_tokens = await self.__storage_service.upload_files(data)
+        return UploadResponseDto(tokens=file_tokens)
 
     @io_router.get("/supported_site_extensions/")
     async def get_supported_site_extensions(self, site: MoleculeRepoSiteEnum) -> list[MoleculeFileExtensionEnum]:
@@ -34,6 +35,6 @@ class IOController:
         return supported_extensions
 
     @io_router.post("/fetch_online_file/")
-    async def fetch_online_file(self, data: FetchOnlineFileRequest) -> FetchOnlineFileResponse:
+    async def fetch_online_file(self, data: FetchOnlineFileRequestDto) -> FetchOnlineFileResponseDto:
         token = await self.__fetcher_service.fetch_data(data)
-        return FetchOnlineFileResponse(token=token)
+        return FetchOnlineFileResponseDto(token=token)

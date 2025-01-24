@@ -1,8 +1,9 @@
 import uuid
+
 from fastapi import HTTPException
 
 from api.enums import MoleculeFileExtensionEnum, MoleculeRepoSiteEnum
-from api.models import FetchOnlineFileRequest
+from api.schemas.online_fetch import FetchOnlineFileRequestDto
 from clients import OnlineFileFetcherClient
 
 
@@ -10,7 +11,7 @@ class OnlineFileFetcherService:
     def __init__(self, fetcher_client: OnlineFileFetcherClient):
         self.__fetcher_client = fetcher_client
 
-    async def fetch_data(self, data: FetchOnlineFileRequest) -> uuid.UUID:
+    async def fetch_data(self, data: FetchOnlineFileRequestDto) -> uuid.UUID:
         if not (site_url := data.site.get_site_url()):
             raise NotImplementedError(f'Missing url mapping for "{data.site}" site')
 

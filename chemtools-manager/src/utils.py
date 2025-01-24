@@ -1,7 +1,5 @@
 import yaml
-
 from dependency_injector.wiring import Provide
-
 from fastapi import Depends
 
 from containers import ApplicationContainer
