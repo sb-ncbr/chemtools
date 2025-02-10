@@ -25,8 +25,6 @@ class BaseDockerizedTool(abc.ABC):
         if self.image_name is None:
             raise ValueError(f'image_name must be set in "{self.__class__.__name__}"')
 
-        os.makedirs(os.path.abspath(f"../data/docker/{self.image_name}/in"), exist_ok=True)
-
     def _get_cmd_params(self, **_) -> str:
         if self.cmd_params is None:
             raise ValueError(f'cmd_params must be set in "{self.__class__.__name__}"')
@@ -51,6 +49,7 @@ class BaseDockerizedTool(abc.ABC):
         if input_files is not None:
             await self.__pull_input_files(input_files)
 
+        os.makedirs(os.path.abspath(f"../data/docker/{self.image_name}/in"), exist_ok=True)
         return token or uuid.uuid4()
 
     async def _postprocess(self, *, _output: str, **kwargs) -> str:

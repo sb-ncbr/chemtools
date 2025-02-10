@@ -1,7 +1,7 @@
 import os
 import re
 
-from api.schemas.gesamt import GesamtResponseDto
+from api.schemas.gesamt import GesamtInputDto, GesamtResponseDto
 from tools import BaseDockerizedTool
 
 
@@ -9,10 +9,25 @@ class GesamtTool(BaseDockerizedTool):
     image_name = "gesamt"
     docker_run_kwargs = {"volumes": {os.path.abspath("../data/docker/gesamt"): {"bind": "/data", "mode": "rw"}}}
 
-    def _get_cmd_params(self, input_files: list[str], *args, **kwargs) -> str:
-        return " ".join([os.path.abspath(f'/data/in/{file_name}') for file_name in input_files])
+    def _get_cmd_params(self, *, input_data: list[GesamtInputDto], **kwargs) -> str:
+        result = " ".join(
+            (f"-d {file.selection_string} " if file.selection_string is not None else "")
+            + os.path.abspath(f'/data/in/{file.file_name}')
+            for file in input_data
+        )
+        return result
 
-    async def _postprocess(self, *, _output: str, **_) -> dict:
+    async def _postprocess(self, *, input_data: list[GesamtInputDto], _output: str, **_) -> dict:
+        print(_output)
+        if len(input_data) == 2:
+            return self.__parse_output_2_files(_output)
+        return self.__parse_output_more_files(_output)
+
+    def _get_error(self, msg):
+        return f"Gesamt calculation failed: {msg}"
+
+    @staticmethod
+    def __parse_output_2_files(_output: str):
         lines = _output.splitlines()
         matrix_start_idx = lines.index(" Transformation matrix for MOVING structure:") + 3
         matrix = list(zip(*[line.split() for line in lines[matrix_start_idx : matrix_start_idx + 3]]))
@@ -26,5 +41,6 @@ class GesamtTool(BaseDockerizedTool):
             "rotation_matrix": [row for row in zip(*matrix)],
         }
 
-    def _get_error(self, msg):
-        return f"Gesamt calculation failed: {msg}"
+    @staticmethod
+    def __parse_output_more_files(_output: str):
+        return {}

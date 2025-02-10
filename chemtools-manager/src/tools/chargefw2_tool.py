@@ -1,5 +1,6 @@
 import os
 from collections import Counter, defaultdict
+import re
 import uuid
 
 from api.enums import ChargeModeEnum
@@ -103,3 +104,8 @@ class ChargeFW2Tool(BaseDockerizedTool):
             atom_counts[atom_type.strip()] = int(atom_count.split(":")[1])
 
         return {**data, "atom_counts": atom_counts}
+
+    @staticmethod
+    def parse_best_params(output: str) -> str | None:
+        match = re.fullmatch(r'Best parameters are: (\S+)\.json\n', output)
+        return match.group(1) if match else None

@@ -20,7 +20,7 @@ class ChargeBestParametersRequestDto(SingleFileRequestDto):
     ignore_water: bool = False
     read_hetatm: bool = False
     permissive_types: bool = False
-    method: str = ''
+    method: str
 
 
 class ChargeSuitableMethodsRequestDto(SingleFileRequestDto):
@@ -43,7 +43,7 @@ class ChargeResponseDto(BaseModel):
 
 
 class ChargeBestParametersResponseDto(BaseModel):
-    result: str
+    best_parameters: str | None
 
 
 class ChargeSuitableMethodsResponseDto(BaseModel):

@@ -1,5 +1,6 @@
+import logging
 from dependency_injector.wiring import inject
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi_utils.cbv import cbv
 
 from api.enums import ChargeModeEnum
@@ -19,6 +20,8 @@ from tools.chargefw2_tool import ChargeFW2Tool
 from tools.gesamt_tool import GesamtTool
 from tools.mole2_tool import Mole2Tool
 from utils import from_app_container
+
+logger = logging.getLogger(__name__)
 
 tools_router = APIRouter(tags=["Tools"])
 
@@ -89,7 +92,8 @@ class ToolsController:
             **data.model_dump(),
             mode=ChargeModeEnum.best_parameters,
         )
-        return ChargeBestParametersResponseDto(result=chargefw2_output)
+        best_params = self.__chargefw2_tool.parse_best_params(chargefw2_output)
+        return ChargeBestParametersResponseDto(best_parameters=best_params)
 
     @tools_router.post("/mole2/")
     async def mole_calculation(self, data: MoleRequestDto) -> dict:
@@ -101,5 +105,7 @@ class ToolsController:
         self,
         data: GesamtRequestDto,
     ) -> GesamtResponseDto:
-        result = await self.__gesamt_tool.run(input_files=data.input_files)
+        result = await self.__gesamt_tool.run(
+            input_data=data.input_files, input_files=[file.file_name for file in data.input_files]
+        )
         return result

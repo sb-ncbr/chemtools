@@ -12,5 +12,10 @@ class GesamtResponseDto(BaseModel):
     translation_vector: list[float]
 
 
+class GesamtInputDto(BaseModel):
+    file_name: str
+    selection_string: str | None = None
+
+
 class GesamtRequestDto(ManyFilesRequestDto):
-    input_files: list[str] = Field(..., min_length=2)
+    input_files: list[GesamtInputDto] = Field(..., min_length=2)
