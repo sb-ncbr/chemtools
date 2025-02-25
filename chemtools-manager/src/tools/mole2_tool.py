@@ -12,7 +12,6 @@ class Mole2Tool(BaseDockerizedTool):
     docker_run_kwargs = {
         "volumes": {
             os.path.abspath("../data/docker/mole2"): {"bind": "/data", "mode": "rw"},
-            os.path.abspath("../data/calculations"): {"bind": "/input_data", "mode": "rw"},
         }
     }
 

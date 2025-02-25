@@ -1,25 +1,20 @@
 import logging
-from dependency_injector.wiring import inject
-from fastapi import APIRouter, HTTPException
+
+from dependency_injector.wiring import Provide, inject
+from fastapi import APIRouter, Depends
 from fastapi_utils.cbv import cbv
 
-from api.enums import ChargeModeEnum
+from api.enums import ChargeModeEnum, DockerizedToolEnum
 from api.schemas.charge import (
     ChargeBestParametersRequestDto,
-    ChargeBestParametersResponseDto,
     ChargeInfoRequestDto,
-    ChargeInfoResponseDto,
     ChargeRequestDto,
-    ChargeResponseDto,
     ChargeSuitableMethodsRequestDto,
-    ChargeSuitableMethodsResponseDto,
 )
-from api.schemas.gesamt import GesamtRequestDto, GesamtResponseDto
+from api.schemas.gesamt import GesamtRequestDto
 from api.schemas.mole import MoleRequestDto
-from tools.chargefw2_tool import ChargeFW2Tool
-from tools.gesamt_tool import GesamtTool
-from tools.mole2_tool import Mole2Tool
-from utils import from_app_container
+from containers import AppContainer
+from services.message_broker_service import MessageBrokerService
 
 logger = logging.getLogger(__name__)
 
@@ -31,81 +26,50 @@ class ToolsController:
     @inject
     def __init__(
         self,
-        chargefw2_tool: ChargeFW2Tool = from_app_container("chargefw2_tool"),
-        mole2_tool: Mole2Tool = from_app_container("mole2_tool"),
-        gesamt_tool: GesamtTool = from_app_container("gesamt_tool"),
+        message_broker_service: MessageBrokerService = Depends(Provide[AppContainer.message_broker_service]),
     ):
-        self.__chargefw2_tool = chargefw2_tool
-        self.__mole2_tool = mole2_tool
-        self.__gesamt_tool = gesamt_tool
+        self.message_broker = message_broker_service
 
     @tools_router.get("/chargefw2/")
     async def chargefw2(self) -> dict[str, list[ChargeModeEnum]]:
         return {"available_modes": [mode for mode in ChargeModeEnum]}
 
     @tools_router.post("/chargefw2/info/")
-    async def charge_info(
-        self,
-        data: ChargeInfoRequestDto,
-    ) -> ChargeInfoResponseDto:
-        chargefw2_output = await self.__chargefw2_tool.run(
-            **data.model_dump(),
-            mode=ChargeModeEnum.info,
+    async def charge_info(self, data: ChargeInfoRequestDto) -> dict:
+        self.message_broker.send_message(
+            _tool_name=DockerizedToolEnum.chargefw2, **data.model_dump(), mode=ChargeModeEnum.info
         )
-        parsed_data = self.__chargefw2_tool.parse_info_output(chargefw2_output)
-        return ChargeInfoResponseDto(**parsed_data)
+        return {"info": "task enqueued"}
 
     @tools_router.post("/chargefw2/charges")
-    async def charge_charges(
-        self,
-        data: ChargeRequestDto,
-    ) -> ChargeResponseDto:
-
-        chargefw2_output = await self.__chargefw2_tool.run(
-            **data.model_dump(),
-            mode=ChargeModeEnum.charges,
+    async def charge_charges(self, data: ChargeRequestDto) -> dict:
+        self.message_broker.send_message(
+            _tool_name=DockerizedToolEnum.chargefw2, **data.model_dump(), mode=ChargeModeEnum.charges
         )
-        return ChargeResponseDto(**chargefw2_output)
+        return {"info": "task enqueued"}
 
     @tools_router.post("/chargefw2/suitable-methods")
-    async def charge_suitable_methods(
-        self,
-        data: ChargeSuitableMethodsRequestDto,
-    ) -> ChargeSuitableMethodsResponseDto:
-
-        chargefw2_output = await self.__chargefw2_tool.run(
-            **data.model_dump(),
-            mode=ChargeModeEnum.suitable_methods,
+    async def charge_suitable_methods(self, data: ChargeSuitableMethodsRequestDto) -> dict:
+        self.message_broker.send_message(
+            _tool_name=DockerizedToolEnum.chargefw2, **data.model_dump(), mode=ChargeModeEnum.suitable_methods
         )
-        methods, parameters = self.__chargefw2_tool.calculate_suitable_methods(chargefw2_output)
-        return ChargeSuitableMethodsResponseDto(
-            methods=methods,
-            parameters=parameters,
-        )
+        return {"info": "task enqueued"}
 
     @tools_router.post("/chargefw2/best-parameters")
-    async def charge_best_parameters(
-        self,
-        data: ChargeBestParametersRequestDto,
-    ) -> ChargeBestParametersResponseDto:
-        chargefw2_output = await self.__chargefw2_tool.run(
-            **data.model_dump(),
-            mode=ChargeModeEnum.best_parameters,
+    async def charge_best_parameters(self, data: ChargeBestParametersRequestDto) -> dict:
+        self.message_broker.send_message(
+            _tool_name=DockerizedToolEnum.chargefw2, **data.model_dump(), mode=ChargeModeEnum.best_parameters
         )
-        best_params = self.__chargefw2_tool.parse_best_params(chargefw2_output)
-        return ChargeBestParametersResponseDto(best_parameters=best_params)
+        return {"info": "task enqueued"}
 
     @tools_router.post("/mole2/")
     async def mole_calculation(self, data: MoleRequestDto) -> dict:
-        # await self.__mole2_tool.run(input_files=data.input_files, token=calculation_token, data=data)
-        return {"status": "ok"}
+        await self.__mole2_tool.run(input_files=data.input_files, data=data)
+        return {"info": "task enqueued"}
 
     @tools_router.post("/gesamt/")
-    async def gesamt_calculation(
-        self,
-        data: GesamtRequestDto,
-    ) -> GesamtResponseDto:
+    async def gesamt_calculation(self, data: GesamtRequestDto) -> dict:
         result = await self.__gesamt_tool.run(
             input_data=data.input_files, input_files=[file.file_name for file in data.input_files]
         )
-        return result
+        return {"info": "task enqueued"}

@@ -1,13 +1,18 @@
-from fastapi import APIRouter, Request
+from celery import Celery
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse
 from fastapi_utils.cbv import cbv
+
+from dependency_injector.wiring import Provide, inject
+
+from containers import AppContainer
 
 system_router = APIRouter(tags=["System"])
 
 
 @cbv(system_router)
 class SystemController:
-    @system_router.get("/", response_class=HTMLResponse)
+    @system_router.get("/", response_class=HTMLResponse, include_in_schema=False)
     async def index(self, request: Request):
         return f"""
         <html>

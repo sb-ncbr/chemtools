@@ -1,24 +1,11 @@
 import uuid
 
 from pydantic import BaseModel
-from pydantic_xml import BaseXmlModel, RootXmlModel
 
 from api.enums import MolePyMolChargePaletteEnum, MolePyMolSurfaceTypeEnum, MoleTunnelWeightFunctionEnum
 
 
-# TODO get rid of this temporary hack.
-# Probably use pydantic-xml package
-class DataToStrMixin:
-    def __getattribute__(self, name):
-        value = super().__getattribute__(name)
-        if isinstance(value, bool):
-            return str(int(value))
-        elif isinstance(value, (float, int)):
-            return str(value)
-        return value
-
-
-class MoleCavityParams(BaseXmlModel):
+class MoleCavityParams(BaseModel):
     ignore_het_atoms: bool = False
     ignore_hydrogens: bool = False
     interior_threshold: float = 1.25
@@ -27,7 +14,7 @@ class MoleCavityParams(BaseXmlModel):
     probe_radius: float = 3
 
 
-class MoleTunnelParams(BaseXmlModel):
+class MoleTunnelParams(BaseModel):
     auto_origin_cover_radius: float = 10
     bottleneck_radius: float = 1.25
     bottleneck_tolerance: float = 0
@@ -42,7 +29,7 @@ class MoleTunnelParams(BaseXmlModel):
     weight_function: MoleTunnelWeightFunctionEnum = MoleTunnelWeightFunctionEnum.voronoi_scale
 
 
-class MoleExportOptions(BaseXmlModel):
+class MoleExportOptions(BaseModel):
     # Formats
     charge_surface: bool = True
     chimera: bool = False
@@ -70,17 +57,17 @@ class MoleExportOptions(BaseXmlModel):
     tunnels: bool = True
 
 
-class MoleExitPoint(BaseXmlModel):
-    X: float
-    Y: float
-    Z: float
+class MoleExitPoint(BaseModel):
+    x: float
+    y: float
+    z: float
 
 
-class MoleExit(BaseXmlModel):
+class MoleExit(BaseModel):
     points: list[MoleExitPoint]
 
 
-class MoleRequestDto(BaseXmlModel):
+class MoleRequestDto(BaseModel):
     cavity: MoleCavityParams = MoleCavityParams()
     tunnel: MoleTunnelParams = MoleTunnelParams()
     export_options: MoleExportOptions = MoleExportOptions()
@@ -90,7 +77,7 @@ class MoleRequestDto(BaseXmlModel):
     # TODO maybe support origins and paths
 
 
-class TunnelsDto(RootXmlModel):
+class TunnelsDto(BaseModel):
     input
 
 

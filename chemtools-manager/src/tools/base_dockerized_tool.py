@@ -42,6 +42,8 @@ class BaseDockerizedTool(abc.ABC):
         token: uuid.UUID | None = None,
         **_,
     ) -> uuid.UUID:
+        os.makedirs(os.path.abspath(f"../data/docker/{self.image_name}/in"), exist_ok=True)
+
         if input_files is None and input_file is None:
             raise ValueError("Either input_files or input_file must be provided")
         if input_file is not None:
@@ -49,7 +51,6 @@ class BaseDockerizedTool(abc.ABC):
         if input_files is not None:
             await self.__pull_input_files(input_files)
 
-        os.makedirs(os.path.abspath(f"../data/docker/{self.image_name}/in"), exist_ok=True)
         return token or uuid.uuid4()
 
     async def _postprocess(self, *, _output: str, **kwargs) -> str:
@@ -72,22 +73,31 @@ class BaseDockerizedTool(abc.ABC):
             await self._file_storage_service.save_file(file_name, file_bytes)
 
     async def run(self, **kwargs) -> str:
+        print(0)
         token = await self._preprocess(**kwargs)
+        print(1)
         cmd_params = self._get_cmd_params(token=token, **kwargs)
+        print(2)
 
         logger.debug(f"Running docker container: {self.image_name} {cmd_params}")
         try:
+            print(3)
+            print("cmd_params", cmd_params)
+            print("kwargs", self._get_docker_run_kwargs(**kwargs))
             calculation_result = await asyncio.to_thread(
                 self._docker.containers.run,
                 self.image_name,
                 cmd_params,
                 **self._get_docker_run_kwargs(**kwargs),
             )
+            print(4)
         except docker.errors.ContainerError as e:
+            print(5)
             logger.error(f"Container error: {e}")
             raise HTTPException(status_code=400, detail=self._get_error(e.stderr.decode("utf-8")))
 
         try:
+            print(6)
             return await self._postprocess(_output=calculation_result.decode(), token=token, **kwargs)
         except Exception as e:
             logger.error(f"Postprocess error: {e}")

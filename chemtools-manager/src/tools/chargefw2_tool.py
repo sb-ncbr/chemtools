@@ -1,9 +1,17 @@
+from typing import Any
+
 import os
 from collections import Counter, defaultdict
 import re
 import uuid
 
 from api.enums import ChargeModeEnum
+from api.schemas.charge import (
+    ChargeBestParametersResponseDto,
+    ChargeInfoResponseDto,
+    ChargeResponseDto,
+    ChargeSuitableMethodsResponseDto,
+)
 from tools import BaseDockerizedTool
 
 
@@ -40,22 +48,28 @@ class ChargeFW2Tool(BaseDockerizedTool):
 
     async def _postprocess(
         self, *, _output: str, input_file: str, token: uuid.UUID = None, mode: ChargeModeEnum, **kwargs
-    ) -> str:
-        if mode == ChargeModeEnum.charges:
-            file_names = os.listdir(f"../data/docker/chargefw2/out/{token}")
-            all_suffixes = {file_name.split(".")[-1] for file_name in file_names}
-            file_token = f"{input_file.split('.')[0]}"
-            response_files = {suffix: f"{file_token}.{suffix}" for suffix in all_suffixes} | {
-                "cif": {file_name.split(".")[0]: file_name for file_name in file_names if file_name.endswith(".cif")},
-            }
-            all_suffixes.discard("cif")
-            await self._push_output_files(
-                token,
-                [response_files[suffix].removesuffix(f".{suffix}") + f".sdf.{suffix}" for suffix in all_suffixes]
-                + list(response_files["cif"].values()),
-            )
-            return response_files
-        return _output
+    ) -> Any:
+        print('reached postprocess')
+        match mode:
+            case ChargeModeEnum.info:
+                parsed_data = self.parse_info_output(_output)
+                return ChargeInfoResponseDto(**parsed_data)
+
+            case ChargeModeEnum.charges:
+                print('here', token, input_file)
+                response_files = self.get_charge_response_files(token, input_file)
+                return ChargeResponseDto(**response_files)
+
+            case ChargeModeEnum.suitable_methods:
+                methods, parameters = self.calculate_suitable_methods(_output)
+                return ChargeSuitableMethodsResponseDto(methods=methods, parameters=parameters)
+
+            case ChargeModeEnum.best_parameters:
+                best_params = self.parse_best_params(_output)
+                return ChargeBestParametersResponseDto(best_parameters=best_params)
+
+            case _:
+                raise NotImplementedError(f"Mode {mode} is not implemented for chargefw2 tool")
 
     def _get_error(self, msg):
         return f"ChargeFW2 calculation failed: {msg}"
@@ -109,3 +123,18 @@ class ChargeFW2Tool(BaseDockerizedTool):
     def parse_best_params(output: str) -> str | None:
         match = re.fullmatch(r'Best parameters are: (\S+)\.json\n', output)
         return match.group(1) if match else None
+
+    def get_charge_response_files(self, token: uuid.UUID | None, input_file: str) -> dict:
+        file_names = os.listdir(f"../data/docker/chargefw2/out/{token}")
+        all_suffixes = {file_name.split(".")[-1] for file_name in file_names}
+        file_token = f"{input_file.split('.')[0]}"
+        response_files = {suffix: f"{file_token}.{suffix}" for suffix in all_suffixes} | {
+            "cif": {file_name.split(".")[0]: file_name for file_name in file_names if file_name.endswith(".cif")},
+        }
+        all_suffixes.discard("cif")
+        self._push_output_files(
+            token,
+            [response_files[suffix].removesuffix(f".{suffix}") + f".sdf.{suffix}" for suffix in all_suffixes]
+            + list(response_files["cif"].values()),
+        )
+        return response_files

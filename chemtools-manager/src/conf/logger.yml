@@ -3,7 +3,7 @@ disable_existing_loggers: False
 
 formatters:
   default:
-    format: "[{asctime}] {levelname:<8s} | chemtools_manager.{name}:{lineno} - {message}"
+    format: "[{asctime}] {levelname:<8s} | {name}:{funcName}:{lineno} - {message}"
     datefmt: "%Y-%m-%d %H:%M:%S"
     style: "{"
 
@@ -17,7 +17,7 @@ handlers:
     class: logging.FileHandler
     level: INFO
     formatter: default
-    filename: ../logs/chemtools_manager_logger.log
+    filename: ext://utils.LOGGING_PATH
     mode: a
 
 root:

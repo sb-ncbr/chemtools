@@ -1,14 +1,14 @@
 from typing import Annotated
 
-from dependency_injector.wiring import inject
-from fastapi import APIRouter, File
+from dependency_injector.wiring import Provide, inject
+from fastapi import APIRouter, Depends, File
 from fastapi_utils.cbv import cbv
 
 from api.enums import MoleculeFileExtensionEnum, MoleculeRepoSiteEnum
 from api.schemas.online_fetch import FetchOnlineFileRequestDto, FetchOnlineFileResponseDto
 from api.schemas.upload import UploadRequestDto, UploadResponseDto
+from containers import AppContainer
 from services import FileStorageService, OnlineFileFetcherService
-from utils import from_app_container
 
 io_router = APIRouter(tags=["I/O"])
 
@@ -18,8 +18,8 @@ class IOController:
     @inject
     def __init__(
         self,
-        storage_service: FileStorageService = from_app_container("file_storage_service"),
-        fetcher_service: OnlineFileFetcherService = from_app_container("online_file_fetcher_service"),
+        storage_service: FileStorageService = Depends(Provide[AppContainer.file_storage_service]),
+        fetcher_service: OnlineFileFetcherService = Depends(Provide[AppContainer.online_file_fetcher_service]),
     ):
         self.__storage_service = storage_service
         self.__fetcher_service = fetcher_service

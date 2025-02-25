@@ -1,8 +1,9 @@
+from pathlib import Path
+import tomllib
 import yaml
-from dependency_injector.wiring import Provide
-from fastapi import Depends
 
-from containers import ApplicationContainer
+ROOT_DIR = Path(__file__).parent.parent.resolve()
+LOGGING_PATH = ROOT_DIR / "logs/logger.log"
 
 
 def load_yml(file_path: str):
@@ -10,5 +11,7 @@ def load_yml(file_path: str):
         return yaml.safe_load(file)
 
 
-def from_app_container(attr_name: str):
-    return Depends(Provide[getattr(ApplicationContainer, attr_name)])
+def get_project_version():
+    pyproject_path = ROOT_DIR / "pyproject.toml"
+    with open(pyproject_path, "rb") as file:
+        return tomllib.load(file)["tool"]["poetry"]["version"]

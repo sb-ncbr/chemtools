@@ -1,6 +1,12 @@
 from enum import StrEnum
 
 
+class DockerizedToolEnum(StrEnum):
+    chargefw2 = "chargefw2"
+    mole2 = "mole2"
+    gesamt = "gesamt"
+
+
 class ChargeModeEnum(StrEnum):
     info = "info"
     charges = "charges"
