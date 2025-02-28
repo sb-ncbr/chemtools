@@ -11,7 +11,7 @@ system_router = APIRouter(tags=["System"])
 
 
 @cbv(system_router)
-class SystemController:
+class SystemRouter:
     @system_router.get("/", response_class=HTMLResponse, include_in_schema=False)
     async def index(self, request: Request):
         return f"""

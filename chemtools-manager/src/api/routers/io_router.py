@@ -14,7 +14,7 @@ io_router = APIRouter(tags=["I/O"])
 
 
 @cbv(io_router)
-class IOController:
+class IORouter:
     @inject
     def __init__(
         self,
@@ -26,7 +26,7 @@ class IOController:
 
     @io_router.post("/custom_files/")
     async def upload_custom_files(self, data: Annotated[UploadRequestDto, File()]) -> UploadResponseDto:
-        file_tokens = await self.__storage_service.upload_files(data)
+        file_tokens = await self.__storage_service.upload_files_from_request(data)
         return UploadResponseDto(tokens=file_tokens)
 
     @io_router.get("/supported_site_extensions/")

@@ -22,7 +22,7 @@ tools_router = APIRouter(tags=["Tools"])
 
 
 @cbv(tools_router)
-class ToolsController:
+class ToolsRouter:
     @inject
     def __init__(
         self,

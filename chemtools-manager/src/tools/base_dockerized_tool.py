@@ -2,13 +2,14 @@ import abc
 import asyncio
 import logging
 import os
+import time
 import uuid
 
-import aiofiles
 import docker
 from fastapi import HTTPException
 
 from services.file_storage_service import FileStorageService
+from utils import ROOT_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -39,66 +40,53 @@ class BaseDockerizedTool(abc.ABC):
         *,
         input_file: str | None = None,
         input_files: list[str] | None = None,
-        token: uuid.UUID | None = None,
         **_,
-    ) -> uuid.UUID:
-        os.makedirs(os.path.abspath(f"../data/docker/{self.image_name}/in"), exist_ok=True)
-
-        if input_files is None and input_file is None:
+    ) -> None:
+        input_files = [*(input_files or []), *(input_file or [])]
+        if not input_files:
             raise ValueError("Either input_files or input_file must be provided")
-        if input_file is not None:
-            await self.__pull_input_files([input_file])
-        if input_files is not None:
-            await self.__pull_input_files(input_files)
 
-        return token or uuid.uuid4()
+        os.makedirs(ROOT_DIR / f"data/docker/{self.image_name}/in", exist_ok=True)
+        await self._file_storage_service.download_files(input_files, ROOT_DIR /f"data/docker/{self.image_name}/in/")
 
-    async def _postprocess(self, *, _output: str, **kwargs) -> str:
+    async def _postprocess(self, *, _output: str, token: uuid.UUID, **kwargs) -> str:
         file_names_to_push = self._get_output_files(_output=_output, **kwargs)
-        await self._push_output_files(file_names=file_names_to_push, **kwargs)
+        await self._file_storage_service.upload_files(
+            file_names_to_push,
+            ROOT_DIR / f"data/docker/{self.image_name}/out/{token}",
+        )
         return _output
 
-    async def __pull_input_files(self, file_names: list[uuid.UUID]) -> None:
-        for file_name in file_names:
-            file_bytes = await self._file_storage_service.fetch_file(file_name)
-            file_path = f"../data/docker/{self.image_name}/in/{file_name}"
-            async with aiofiles.open(file_path, "wb") as file:
-                await file.write(file_bytes)
-
-    async def _push_output_files(self, token: uuid.UUID, file_names: list[str]) -> None:
-        for file_name in file_names:
-            file_path = f"../data/docker/{self.image_name}/out/{token}/{file_name}"
-            async with aiofiles.open(file_path, "rb") as file:
-                file_bytes = await file.read()
-            await self._file_storage_service.save_file(file_name, file_bytes)
-
     async def run(self, **kwargs) -> str:
-        print(0)
-        token = await self._preprocess(**kwargs)
-        print(1)
-        cmd_params = self._get_cmd_params(token=token, **kwargs)
-        print(2)
+        logger.debug(f"Running {self.image_name} tool with kwargs={kwargs}")
+        start_time = time.time()
 
-        logger.debug(f"Running docker container: {self.image_name} {cmd_params}")
+        logger.debug(f"Invoking preprocess")
+        await self._preprocess(**kwargs)
+
+        logger.debug(f"Obtaining cmd_params")
+        cmd_params = self._get_cmd_params(**kwargs)
+        logger.debug(f"Obtained cmd_params: {cmd_params}")
+
         try:
-            print(3)
-            print("cmd_params", cmd_params)
-            print("kwargs", self._get_docker_run_kwargs(**kwargs))
+            logger.debug(f"Running docker container: {self.image_name} {cmd_params}")
             calculation_result = await asyncio.to_thread(
                 self._docker.containers.run,
                 self.image_name,
                 cmd_params,
                 **self._get_docker_run_kwargs(**kwargs),
             )
-            print(4)
         except docker.errors.ContainerError as e:
-            print(5)
-            logger.error(f"Container error: {e}")
+            logger.error(f"Docker run failed on error: {e}")
             raise HTTPException(status_code=400, detail=self._get_error(e.stderr.decode("utf-8")))
 
         try:
-            print(6)
-            return await self._postprocess(_output=calculation_result.decode(), token=token, **kwargs)
+            logger.debug(f"Docker run finished. Invoking postprocess")
+            postprocessed_result = await self._postprocess(_output=calculation_result.decode(), **kwargs)
         except Exception as e:
             logger.error(f"Postprocess error: {e}")
             raise HTTPException(status_code=500, detail="An error occurred during postprocessing")
+
+        time_total = time.time() - start_time
+        logger.info(f"Tool {self.image_name} finished successfully in {time_total:.2f} seconds")
+        return postprocessed_result

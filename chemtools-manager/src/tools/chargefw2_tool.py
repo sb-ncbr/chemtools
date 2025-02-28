@@ -13,11 +13,12 @@ from api.schemas.charge import (
     ChargeSuitableMethodsResponseDto,
 )
 from tools import BaseDockerizedTool
+from utils import ROOT_DIR
 
 
 class ChargeFW2Tool(BaseDockerizedTool):
     image_name = "chargefw2"
-    docker_run_kwargs = {"volumes": {os.path.abspath("../data/docker/chargefw2"): {"bind": "/data", "mode": "rw"}}}
+    docker_run_kwargs = {"volumes": {ROOT_DIR / "data/docker/chargefw2": {"bind": "/data", "mode": "rw"}}}
 
     def _get_cmd_params(
         self,
@@ -43,7 +44,7 @@ class ChargeFW2Tool(BaseDockerizedTool):
     async def _preprocess(self, **kwargs) -> uuid.UUID:
         token = await super()._preprocess(**kwargs)
         if token is not None:
-            os.makedirs(f"../data/docker/chargefw2/out/{token}", exist_ok=True)
+            os.makedirs(ROOT_DIR / f"data/docker/chargefw2/out/{token}", exist_ok=True)
         return token
 
     async def _postprocess(
@@ -56,8 +57,7 @@ class ChargeFW2Tool(BaseDockerizedTool):
                 return ChargeInfoResponseDto(**parsed_data)
 
             case ChargeModeEnum.charges:
-                print('here', token, input_file)
-                response_files = self.get_charge_response_files(token, input_file)
+                response_files = await self.get_charge_response_files(token, input_file)
                 return ChargeResponseDto(**response_files)
 
             case ChargeModeEnum.suitable_methods:
@@ -124,7 +124,7 @@ class ChargeFW2Tool(BaseDockerizedTool):
         match = re.fullmatch(r'Best parameters are: (\S+)\.json\n', output)
         return match.group(1) if match else None
 
-    def get_charge_response_files(self, token: uuid.UUID | None, input_file: str) -> dict:
+    async def get_charge_response_files(self, token: uuid.UUID | None, input_file: str) -> dict:
         file_names = os.listdir(f"../data/docker/chargefw2/out/{token}")
         all_suffixes = {file_name.split(".")[-1] for file_name in file_names}
         file_token = f"{input_file.split('.')[0]}"
@@ -132,7 +132,7 @@ class ChargeFW2Tool(BaseDockerizedTool):
             "cif": {file_name.split(".")[0]: file_name for file_name in file_names if file_name.endswith(".cif")},
         }
         all_suffixes.discard("cif")
-        self._push_output_files(
+        await self._push_output_files(
             token,
             [response_files[suffix].removesuffix(f".{suffix}") + f".sdf.{suffix}" for suffix in all_suffixes]
             + list(response_files["cif"].values()),

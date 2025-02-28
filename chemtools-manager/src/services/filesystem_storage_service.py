@@ -1,15 +1,13 @@
+import logging
 import os
 import uuid
-from typing import TYPE_CHECKING
 
 import aiofiles
 from fastapi import HTTPException
 
-from api.schemas.upload import UploadRequestDto
 from services import FileStorageService
 
-if TYPE_CHECKING:
-    pass
+logger = logging.getLogger(__name__)
 
 
 class FilesystemStorageService(FileStorageService):
@@ -20,27 +18,8 @@ class FilesystemStorageService(FileStorageService):
             os.makedirs(self._DATA_DIR)
         super().__init__(*args, **kwargs)
 
-    # NOTE there might be a filename collision when unzipping files from multiple zip files or
-    # when uploading additional files with the same name
-    async def upload_files(self, data: UploadRequestDto) -> list[uuid.UUID]:
-        created_tokens = []
-        for request_file in data.files:
-            if request_file.content_type == "application/zip":
-                for file_name, file_func_wrapper in self.unzip_files(request_file.file).items():
-                    token = await self.save_file(file_name=file_name, file_bytes=file_func_wrapper())
-                    created_tokens.append(token)
-
-            else:
-                token = await self.save_file(
-                    file_name=request_file.filename,
-                    file_bytes=await request_file.read(),
-                )
-                created_tokens.append(token)
-
-        return created_tokens
-
     # NOTE if there is a directory in zip file, it fails
-    async def save_file(self, file_name: str, file_bytes: bytes, token: uuid.UUID | None = None) -> uuid.UUID:
+    async def push_file(self, file_name: str, file_bytes: bytes, token: uuid.UUID | None = None) -> uuid.UUID:
         if token is None:
             token = uuid.uuid4()
 

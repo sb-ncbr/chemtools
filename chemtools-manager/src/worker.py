@@ -1,16 +1,25 @@
+from datetime import datetime
 import asyncio
+from api.schemas.calculation import CalculationDto
 from celery import Celery
 
 from api.enums import DockerizedToolEnum
 from conf.settings import RabbitMQSettings, WorkerSettings
 import logging.config
 
+from db.models.calculation import CalculationStatus
+from db.repos.calculation_repo import CalculationRepo
+from tools.base_dockerized_tool import BaseDockerizedTool
 from tools.chargefw2_tool import ChargeFW2Tool
 from tools.gesamt_tool import GesamtTool
 from tools.mole2_tool import Mole2Tool
 import utils
 from containers import WorkerContainer
 from dependency_injector.wiring import Provide, inject
+
+from db.database import sessionmanager
+
+logger = logging.getLogger(__name__)
 
 
 def init_worker_di() -> None:
@@ -53,7 +62,7 @@ def get_dockerized_tool(
     chargefw2_tool: ChargeFW2Tool = Provide[WorkerContainer.chargefw2_tool],
     mole2_tool: Mole2Tool = Provide[WorkerContainer.mole2_tool],
     gesamt_tool: GesamtTool = Provide[WorkerContainer.gesamt_tool],
-):
+) -> BaseDockerizedTool:
     tool = {
         DockerizedToolEnum.chargefw2: chargefw2_tool,
         DockerizedToolEnum.mole2: mole2_tool,
@@ -62,6 +71,7 @@ def get_dockerized_tool(
 
     if not tool:
         raise NotImplementedError(f"Tool class not found for {_tool_name}")
+
     return tool
 
 
@@ -70,14 +80,29 @@ init_logging()
 app = init_worker()
 
 
+async def run_task_async(calculation_dto: CalculationDto) -> None:
+    with sessionmanager.session() as db:
+        calculation_repo = CalculationRepo(db)
+        calculation = await calculation_repo.get_or_create(
+            calculation_dto.id,
+            **calculation_dto.model_dump(),
+            status=CalculationStatus.running,
+            time_started=datetime.now()
+        )
+
+        dockerized_tool = get_dockerized_tool(calculation_dto.tool_name)
+        logger.info(f"Running '{dockerized_tool.image_name}' tool by user={calculation_dto.user_id}")
+        status = CalculationStatus.success
+        try:
+            result = await dockerized_tool.run(calculation_dto.id, **calculation_dto.model_dump())
+        except Exception as e:
+            logger.error(f"Tool '{dockerized_tool.image_name}' failed with error: {e}")
+            result = str(e)
+            status = CalculationStatus.failure
+
+        calculation_repo.update(calculation, result=result, status=status, time_finished=datetime.now())
+
+
 @app.task
-def chemtool_task(_tool_name: DockerizedToolEnum, *args, **kwargs) -> None:
-    dockerized_tool = get_dockerized_tool(_tool_name)
-    print(f"Running tool: {dockerized_tool.image_name} with args: {args} and kwargs: {kwargs}")
-    tool_result = asyncio.run(dockerized_tool.run(*args, **kwargs))
-    print(tool_result)
-    # TODO implement callback
-    # requests.post(
-    #     data.callback_url,
-    #     json=tool_result.dict(),
-    # )
+def chemtool_task(*args, **kwargs) -> None:
+    asyncio.run(run_task_async(*args, **kwargs))

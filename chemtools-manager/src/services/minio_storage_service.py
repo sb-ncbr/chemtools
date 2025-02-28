@@ -21,14 +21,7 @@ class MinIOClient(FileStorageService):
         if not self.client.bucket_exists(self.bucket_name):
             self.client.make_bucket(self.bucket_name)
 
-    async def upload_files(self, data: UploadRequestDto) -> list[uuid.UUID]:
-        file_ids = []
-        for file in data.files:
-            file_id = await self.save_file(file.filename, await file.read())
-            file_ids.append(file_id)
-        return file_ids
-
-    async def save_file(self, file_name: str, file_bytes: bytes, token: uuid.UUID | None = None) -> uuid.UUID:
+    async def push_file(self, file_name: str, file_bytes: bytes, token: uuid.UUID | None = None) -> uuid.UUID:
         file_id = token or uuid.uuid4()
         object_name = f"{file_id}_{file_name}"
 

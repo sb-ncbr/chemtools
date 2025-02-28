@@ -22,12 +22,12 @@ class PostgresSettings(BaseEnvSettings):
     POSTGRES_PASSWORD: str = "postgres"
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
-    POSTGRES_DB: str = "postgres"
+    POSTGRES_DB: str = "chemtools-db"
 
     @property
     def postgres_url(self):
         return (
-            f"postgres://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+            f"postgres+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
             f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
         )
 

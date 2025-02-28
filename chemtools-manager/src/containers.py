@@ -1,4 +1,3 @@
-from celery import Celery
 import docker
 from dependency_injector import containers, providers
 

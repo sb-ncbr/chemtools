@@ -19,7 +19,7 @@ class OnlineFileFetcherClient:
     async def fetch_from(self, site_url: str, data: 'FetchOnlineFileRequestDto') -> uuid.UUID:
         data_bytes = await self._download(site_url.format(**data.model_dump()))
         file_name = f"{data.molecule_id}.{data.extension}"
-        token = await self.__storage_service.save_file(file_name, data_bytes)
+        token = await self.__storage_service.push_file(file_name, data_bytes)
         return token
 
     async def _download(self, full_url: str) -> dict:
