@@ -1,6 +1,7 @@
 import uuid
-from pydantic import BaseModel, ConfigDict
 from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict
 
 
 class UserDto(BaseModel):

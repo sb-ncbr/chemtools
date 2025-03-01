@@ -1,10 +1,12 @@
-from datetime import datetime
-from typing import TYPE_CHECKING, Optional
-from enum import StrEnum
 import uuid
-from api.enums import DockerizedToolEnum
+from datetime import datetime
+from enum import StrEnum
+from typing import TYPE_CHECKING, Optional
+
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from api.enums import DockerizedToolEnum
 from db.database import Base
 
 if TYPE_CHECKING:

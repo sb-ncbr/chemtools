@@ -6,7 +6,7 @@ from conf.settings import RabbitMQSettings
 class MessageBrokerService:
     def __init__(self, rabbitmq_settings: RabbitMQSettings):
         self.celery_worker = Celery(
-            'worker',
+            "worker",
             broker=rabbitmq_settings.rabbitmq_url,
             worker_prefetch_multiplier=1,
             task_queues={
@@ -21,5 +21,5 @@ class MessageBrokerService:
 
     def send_message(self, *args, _priority: int = 0, **kwargs):
         self.celery_worker.send_task(
-            f"worker.chemtool_task", queue=self.queue_name, priority=_priority, args=args, kwargs=kwargs
+            "worker.chemtool_task", queue=self.queue_name, priority=_priority, args=args, kwargs=kwargs
         )

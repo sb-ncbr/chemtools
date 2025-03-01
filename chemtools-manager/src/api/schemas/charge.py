@@ -12,8 +12,8 @@ class ChargeRequestDto(SingleFileRequestDto):
     ignore_water: bool = False
     read_hetatm: bool = False
     permissive_types: bool = False
-    method: str = ''
-    parameter: str = ''
+    method: str = ""
+    parameter: str = ""
 
 
 class ChargeBestParametersRequestDto(SingleFileRequestDto):

@@ -1,4 +1,3 @@
-import uuid
 
 from pydantic import BaseModel, field_validator
 
@@ -12,7 +11,7 @@ class FetchOnlineFileRequestDto(BaseModel):
 
     @field_validator("molecule_id")
     def check_molecule_id(cls, v):
-        if not v or '?' in v:
+        if not v or "?" in v:
             raise ValueError("invalid molecule_id")
 
         return v

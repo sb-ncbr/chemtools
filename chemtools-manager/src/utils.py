@@ -2,8 +2,8 @@ import logging
 import tomllib
 from typing import Callable
 from zipfile import ZipFile
-import yaml
 
+import yaml
 from fastapi import File
 
 from conf.const import ROOT_DIR

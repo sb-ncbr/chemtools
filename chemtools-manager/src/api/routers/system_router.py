@@ -1,11 +1,6 @@
-from celery import Celery
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from fastapi_utils.cbv import cbv
-
-from dependency_injector.wiring import Provide, inject
-
-from containers import AppContainer
 
 system_router = APIRouter(tags=["System"])
 

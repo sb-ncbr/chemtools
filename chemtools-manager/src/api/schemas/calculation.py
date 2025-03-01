@@ -1,8 +1,8 @@
 import uuid
 
-from api.enums import DockerizedToolEnum
 from pydantic import BaseModel
 
+from api.enums import DockerizedToolEnum
 from db.models.calculation import CalculationStatusEnum
 
 

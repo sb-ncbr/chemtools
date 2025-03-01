@@ -1,5 +1,4 @@
 import logging
-import uuid
 from typing import TYPE_CHECKING
 
 import httpx
@@ -13,10 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 class OnlineFileFetcherClient:
-    def __init__(self, storage_service: 'FileStorageService'):
+    def __init__(self, storage_service: "FileStorageService"):
         self.__storage_service = storage_service
 
-    async def fetch_from(self, site_url: str, data: 'FetchOnlineFileRequestDto') -> str:
+    async def fetch_from(self, site_url: str, data: "FetchOnlineFileRequestDto") -> str:
         data_bytes = await self._download(site_url.format(**data.model_dump()))
         file_name = f"{data.molecule_id}.{data.extension}"
         remote_file = await self.__storage_service.push_file(file_name, data_bytes)

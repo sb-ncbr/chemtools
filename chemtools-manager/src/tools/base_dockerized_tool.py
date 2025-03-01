@@ -7,8 +7,8 @@ import uuid
 
 import docker
 
-from services.file_storage_service import FileStorageService
 from conf.const import ROOT_DIR
+from services.file_storage_service import FileStorageService
 
 logger = logging.getLogger(__name__)
 
@@ -57,10 +57,10 @@ class BaseDockerizedTool(abc.ABC):
         logger.debug(f"Running {self.image_name} tool with kwargs={kwargs}")
         start_time = time.time()
 
-        logger.debug(f"Invoking preprocess")
+        logger.debug("Invoking preprocess")
         await self._preprocess(**kwargs)
 
-        logger.debug(f"Obtaining cmd_params")
+        logger.debug("Obtaining cmd_params")
         cmd_params = self._get_cmd_params(**kwargs)
         logger.debug(f"Obtained cmd_params: {cmd_params}")
 
@@ -77,7 +77,7 @@ class BaseDockerizedTool(abc.ABC):
             raise ContainerRuntimeError(self._get_error(e.stderr.decode("utf-8")))
 
         try:
-            logger.debug(f"Docker run finished. Invoking postprocess")
+            logger.debug("Docker run finished. Invoking postprocess")
             postprocessed_result = await self._postprocess(_output=calculation_result.decode(), **kwargs)
         except Exception as e:
             logger.exception(f"Postprocess error: {e}")

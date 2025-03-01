@@ -1,7 +1,9 @@
-from typing import TYPE_CHECKING
-from datetime import UTC, datetime
 import uuid
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING
+
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from db.database import Base
 
 if TYPE_CHECKING:

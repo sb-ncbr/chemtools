@@ -1,9 +1,8 @@
 import uuid
-from db.models.user import UserModel
-from db.repos.base_repo import BaseRepo
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from db.models.calculation import CalculationModel
+from db.models.user import UserModel
+from db.repos.base_repo import BaseRepo
 
 
 class UserRepo(BaseRepo):

@@ -1,14 +1,14 @@
 from contextlib import asynccontextmanager
 
-from db.database import DatabaseSessionManager
-from utils import get_project_version, init_app_di, init_logging
 import uvicorn
+from dependency_injector.wiring import Provide, inject
 from fastapi import FastAPI
 
-from conf.settings import AppSettings, PostgresSettings
 from api.routers import router_list
+from conf.settings import AppSettings, PostgresSettings
 from containers import AppContainer
-from dependency_injector.wiring import Provide, inject
+from db.database import DatabaseSessionManager
+from utils import get_project_version, init_app_di, init_logging
 
 
 @inject

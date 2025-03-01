@@ -4,7 +4,7 @@ from conf.const import ROOT_DIR
 
 
 class BaseEnvSettings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=ROOT_DIR / '.env', extra="ignore")
+    model_config = SettingsConfigDict(env_file=ROOT_DIR / ".env", extra="ignore")
 
 
 class AppSettings(BaseEnvSettings):

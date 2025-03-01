@@ -42,29 +42,32 @@ class ToolsRouter:
         calculation_dto = await self.calculation_service.create_calculation(
             request, {**data.model_dump(), "mode": ChargeModeEnum.info}, DockerizedToolEnum.chargefw2
         )
-        self.message_broker.send_message(calculation_dto.model_dump(), _priority=0)
+        self.message_broker.send_message(data=calculation_dto.model_dump(), _priority=0)
         return {"info": "task enqueued", "token": calculation_dto.id}
 
     @tools_router.post("/chargefw2/charges")
     async def charge_charges(self, request: Request, data: ChargeRequestDto) -> dict:
-        self.message_broker.send_message(
-            _tool_name=DockerizedToolEnum.chargefw2, **data.model_dump(), mode=ChargeModeEnum.charges
+        calculation_dto = await self.calculation_service.create_calculation(
+            request, {**data.model_dump(), "mode": ChargeModeEnum.charges}, DockerizedToolEnum.chargefw2
         )
-        return {"info": "task enqueued"}
+        self.message_broker.send_message(data=calculation_dto.model_dump(), _priority=0)
+        return {"info": "task enqueued", "token": calculation_dto.id}
 
     @tools_router.post("/chargefw2/suitable-methods")
     async def charge_suitable_methods(self, request: Request, data: ChargeSuitableMethodsRequestDto) -> dict:
-        self.message_broker.send_message(
-            _tool_name=DockerizedToolEnum.chargefw2, **data.model_dump(), mode=ChargeModeEnum.suitable_methods
+        calculation_dto = await self.calculation_service.create_calculation(
+            request, {**data.model_dump(), "mode": ChargeModeEnum.suitable_methods}, DockerizedToolEnum.chargefw2
         )
-        return {"info": "task enqueued"}
+        self.message_broker.send_message(data=calculation_dto.model_dump(), _priority=0)
+        return {"info": "task enqueued", "token": calculation_dto.id}
 
     @tools_router.post("/chargefw2/best-parameters")
     async def charge_best_parameters(self, request: Request, data: ChargeBestParametersRequestDto) -> dict:
-        self.message_broker.send_message(
-            _tool_name=DockerizedToolEnum.chargefw2, **data.model_dump(), mode=ChargeModeEnum.best_parameters
+        calculation_dto = await self.calculation_service.create_calculation(
+            request, {**data.model_dump(), "mode": ChargeModeEnum.best_parameters}, DockerizedToolEnum.chargefw2
         )
-        return {"info": "task enqueued"}
+        self.message_broker.send_message(data=calculation_dto.model_dump(), _priority=0)
+        return {"info": "task enqueued", "token": calculation_dto.id}
 
     @tools_router.post("/mole2")
     async def mole_calculation(self, request: Request, data: MoleRequestDto) -> dict:

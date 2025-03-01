@@ -3,7 +3,7 @@ from typing import Any, TypeVar
 
 from sqlalchemy import select
 
-from db.database import DatabaseSessionManager
+from db.database import Base, DatabaseSessionManager
 
 Entity = TypeVar("Entity", bound="Base")
 

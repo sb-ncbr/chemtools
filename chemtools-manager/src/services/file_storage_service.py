@@ -1,11 +1,9 @@
 import abc
 import logging
 import os
-from pathlib import Path
 import uuid
 
 import aiofiles
-
 
 from api.schemas.upload import UploadRequestDto
 from utils import unzip_files

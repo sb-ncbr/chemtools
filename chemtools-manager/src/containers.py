@@ -1,12 +1,12 @@
 import docker
-from db import repos
-from db.database import DatabaseSessionManager
 from dependency_injector import containers, providers
 
 import clients
-from conf import settings
 import services
 import tools
+from conf import settings
+from db import repos
+from db.database import DatabaseSessionManager
 
 
 class AppContainer(containers.DeclarativeContainer):

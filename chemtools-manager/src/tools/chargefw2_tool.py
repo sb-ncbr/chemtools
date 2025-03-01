@@ -1,9 +1,7 @@
-from typing import Any
-
 import os
-from collections import Counter, defaultdict
 import re
 import uuid
+from collections import Counter, defaultdict
 
 from api.enums import ChargeModeEnum
 from api.schemas.charge import (
@@ -12,8 +10,8 @@ from api.schemas.charge import (
     ChargeResponseDto,
     ChargeSuitableMethodsResponseDto,
 )
-from tools import BaseDockerizedTool
 from conf.const import ROOT_DIR
+from tools import BaseDockerizedTool
 
 
 class ChargeFW2Tool(BaseDockerizedTool):
@@ -24,12 +22,12 @@ class ChargeFW2Tool(BaseDockerizedTool):
         self,
         input_files: list[str],
         mode: ChargeModeEnum,
-        token: str = '',
+        token: str = "",
         ignore_water: bool = False,
         read_hetatm: bool = False,
         permissive_types: bool = False,
-        method: str = '',
-        parameter: str = '',
+        method: str = "",
+        parameter: str = "",
         **_,
     ) -> str:
         in_path = os.path.abspath(f"/data/in/{input_files[0]}")
@@ -37,7 +35,11 @@ class ChargeFW2Tool(BaseDockerizedTool):
 
         base_args = f"--mode {mode} --input-file {in_path}"
         out_param = f" --chg-out-dir {out_path}" if mode == ChargeModeEnum.charges else ""
-        flags = f"{' --ignore-water' if ignore_water else ''}{' --read-hetatm' if read_hetatm else ''}{' --permissive-types' if permissive_types else ''}"
+        flags = (
+            f"{' --ignore-water' if ignore_water else ''}"
+            f"{' --read-hetatm' if read_hetatm else ''}"
+            f"{' --permissive-types' if permissive_types else ''}"
+        )
         parameters = f"{f' --method {method}' if method else ''}{f' --par-file {parameter}' if parameter else ''}"
         return f"{base_args}{out_param}{flags}{parameters}"
 
@@ -111,7 +113,7 @@ class ChargeFW2Tool(BaseDockerizedTool):
 
     @staticmethod
     def parse_best_params(output: str) -> str | None:
-        match = re.fullmatch(r'Best parameters are: (\S+)\.json\n', output)
+        match = re.fullmatch(r"Best parameters are: (\S+)\.json\n", output)
         return match.group(1) if match else None
 
     async def get_charge_response_files(self, token: uuid.UUID | None, input_file: str) -> dict:
