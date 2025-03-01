@@ -117,7 +117,7 @@ class ChargeFW2Tool(BaseDockerizedTool):
         return match.group(1) if match else None
 
     async def get_charge_response_files(self, token: uuid.UUID | None, input_file: str) -> dict:
-        file_names = os.listdir(f"../data/docker/chargefw2/out/{token}")
+        file_names = os.listdir(ROOT_DIR / f"data/docker/chargefw2/out/{token}")
         all_suffixes = {file_name.split(".")[-1] for file_name in file_names}
         file_token = f"{input_file.split('.')[0]}"
         response_files = {suffix: f"{file_token}.{suffix}" for suffix in all_suffixes} | {

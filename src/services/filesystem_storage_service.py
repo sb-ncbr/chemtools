@@ -5,13 +5,14 @@ import uuid
 import aiofiles
 from fastapi import HTTPException
 
+from conf.const import ROOT_DIR
 from services import FileStorageService
 
 logger = logging.getLogger(__name__)
 
 
 class FilesystemStorageService(FileStorageService):
-    _DATA_DIR = "../data/file_storage"
+    _DATA_DIR = ROOT_DIR / "data/file_storage"
 
     def __init__(self, *args, **kwargs):
         if not os.path.exists(self._DATA_DIR):

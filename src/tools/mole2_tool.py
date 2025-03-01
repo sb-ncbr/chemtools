@@ -4,6 +4,7 @@ from lxml import etree
 from lxml.builder import E
 
 from api.schemas.mole import MoleRequestDto
+from conf.const import ROOT_DIR
 from tools import BaseDockerizedTool
 
 
@@ -11,7 +12,7 @@ class Mole2Tool(BaseDockerizedTool):
     image_name = "mole2"
     docker_run_kwargs = {
         "volumes": {
-            os.path.abspath("../data/docker/mole2"): {"bind": "/data", "mode": "rw"},
+            os.path.abspath(ROOT_DIR / "data/docker/mole2"): {"bind": "/data", "mode": "rw"},
         }
     }
 
@@ -97,4 +98,4 @@ class Mole2Tool(BaseDockerizedTool):
             ),
         )
         doc = etree.ElementTree(root)
-        doc.write(f"../data/docker/mole2/{token}/input.xml", pretty_print=True)
+        doc.write(ROOT_DIR / f"data/docker/mole2/{token}/input.xml", pretty_print=True)

@@ -2,12 +2,13 @@ import os
 import re
 
 from api.schemas.gesamt import GesamtInputDto
+from conf.const import ROOT_DIR
 from tools import BaseDockerizedTool
 
 
 class GesamtTool(BaseDockerizedTool):
     image_name = "gesamt"
-    docker_run_kwargs = {"volumes": {os.path.abspath("../data/docker/gesamt"): {"bind": "/data", "mode": "rw"}}}
+    docker_run_kwargs = {"volumes": {os.path.abspath(ROOT_DIR / "data/docker/gesamt"): {"bind": "/data", "mode": "rw"}}}
 
     def _get_cmd_params(self, *, input_data: list[GesamtInputDto], **kwargs) -> str:
         result = " ".join(

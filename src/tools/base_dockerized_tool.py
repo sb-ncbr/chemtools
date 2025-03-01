@@ -66,8 +66,7 @@ class BaseDockerizedTool(abc.ABC):
 
         try:
             logger.debug(f"Running docker container: {self.image_name} {cmd_params}")
-            calculation_result = await asyncio.to_thread(
-                self._docker.containers.run,
+            calculation_result = self._docker.containers.run(
                 self.image_name,
                 cmd_params,
                 **self._get_docker_run_kwargs(**kwargs),
