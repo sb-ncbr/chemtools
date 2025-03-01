@@ -113,7 +113,6 @@ async def run_task_async(data: dict) -> None:
             user_id=calculation_dto.user_id,
             **calculation_dto.input_data,
         )
-
     except Exception as e:
         error_log = f"Tool '{dockerized_tool.image_name}' run by user={calculation_dto.user_id} failed with error: {e}"
         if isinstance(e, ContainerRuntimeError):

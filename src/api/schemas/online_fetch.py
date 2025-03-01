@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel, field_validator
 
 from api.enums import MoleculeFileExtensionEnum, MoleculeRepoSiteEnum

@@ -20,7 +20,6 @@ class CalculationService:
                 user_ip=request.client.host,
             ),
         )
-
         # Merge all input_files into a single list and remove them from the data dict.
         # If there is one input_file, it will be converted to a list of length 1.
         input_file = data.pop("input_file", None)

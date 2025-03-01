@@ -71,12 +71,16 @@ class ToolsRouter:
 
     @tools_router.post("/mole2")
     async def mole_calculation(self, request: Request, data: MoleRequestDto) -> dict:
-        await self.__mole2_tool.run(input_files=data.input_files, data=data)
-        return {"info": "task enqueued"}
+        calculation_dto = await self.calculation_service.create_calculation(
+            request, data.model_dump(), DockerizedToolEnum.mole2
+        )
+        self.message_broker.send_message(data=calculation_dto.model_dump(), _priority=0)
+        return {"info": "task enqueued", "token": calculation_dto.id}
 
     @tools_router.post("/gesamt")
     async def gesamt_calculation(self, request: Request, data: GesamtRequestDto) -> dict:
-        result = await self.__gesamt_tool.run(
-            input_data=data.input_files, input_files=[file.file_name for file in data.input_files]
+        calculation_dto = await self.calculation_service.create_calculation(
+            request, data.model_dump(), DockerizedToolEnum.gesamt
         )
-        return {"info": "task enqueued"}
+        self.message_broker.send_message(data=calculation_dto.model_dump(), _priority=0)
+        return {"info": "task enqueued", "token": calculation_dto.id}

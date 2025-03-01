@@ -1,4 +1,3 @@
-
 from fastapi import HTTPException
 
 from api.enums import MoleculeFileExtensionEnum, MoleculeRepoSiteEnum

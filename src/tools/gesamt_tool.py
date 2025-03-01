@@ -1,7 +1,7 @@
+import json
 import os
 import re
 
-from api.schemas.gesamt import GesamtInputDto
 from conf.const import ROOT_DIR
 from tools import BaseDockerizedTool
 
@@ -10,18 +10,18 @@ class GesamtTool(BaseDockerizedTool):
     image_name = "gesamt"
     docker_run_kwargs = {"volumes": {os.path.abspath(ROOT_DIR / "data/docker/gesamt"): {"bind": "/data", "mode": "rw"}}}
 
-    def _get_cmd_params(self, *, input_data: list[GesamtInputDto], **kwargs) -> str:
+    def _get_cmd_params(self, *, input_files: list[str], selection_strings: list[str], **_) -> str:
         result = " ".join(
-            (f"-d {file.selection_string} " if file.selection_string is not None else "")
-            + os.path.abspath(f"/data/in/{file.file_name}")
-            for file in input_data
+            (f"-d {selection_string} " if selection_string is not None else "")
+            + os.path.abspath(f"/data/in/{file_name}")
+            for file_name, selection_string in zip(input_files, selection_strings)
         )
         return result
 
-    async def _postprocess(self, *, input_data: list[GesamtInputDto], _output: str, **_) -> dict:
-        if len(input_data) == 2:
-            return self.__parse_output_2_files(_output)
-        return self.__parse_output_more_files(_output)
+    async def _postprocess(self, *, input_files: list[str], _output: str, **_) -> str:
+        if len(input_files) == 2:
+            return json.dumps(self.__parse_output_2_files(_output))
+        return json.dumps(self.__parse_output_more_files(_output))
 
     def _get_error(self, msg):
         return f"Gesamt calculation failed: {msg}"
