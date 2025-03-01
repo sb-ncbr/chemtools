@@ -1,4 +1,6 @@
 import docker
+from db import repos
+from db.database import DatabaseSessionManager
 from dependency_injector import containers, providers
 
 import clients
@@ -9,9 +11,29 @@ import tools
 
 class AppContainer(containers.DeclarativeContainer):
     app_settings = providers.Singleton(settings.AppSettings)
+    postgres_settings = providers.Singleton(settings.PostgresSettings)
     minio_settings = providers.Singleton(settings.MinIOSettings)
     rabbitmq_settings = providers.Singleton(settings.RabbitMQSettings)
 
+    session_manager = providers.Singleton(DatabaseSessionManager)
+
+    calculation_repo = providers.Singleton(
+        repos.CalculationRepo,
+        session_manager=session_manager,
+    )
+    user_repo = providers.Singleton(
+        repos.UserRepo,
+        session_manager=session_manager,
+    )
+
+    calculation_service = providers.Singleton(
+        services.CalculationService,
+        calculation_repo=calculation_repo,
+    )
+    user_service = providers.Singleton(
+        services.UserService,
+        user_repo=user_repo,
+    )
     file_storage_service = providers.Singleton(
         services.MinIOClient,
         minio_settings=minio_settings,
@@ -30,7 +52,10 @@ class AppContainer(containers.DeclarativeContainer):
 
 class WorkerContainer(containers.DeclarativeContainer):
     worker_settings = providers.Singleton(settings.WorkerSettings)
+    postgres_settings = providers.Singleton(settings.PostgresSettings)
     rabbitmq_settings = providers.Singleton(settings.RabbitMQSettings)
+
+    session_manager = providers.Singleton(DatabaseSessionManager)
 
     docker = providers.Singleton(docker.from_env)
 

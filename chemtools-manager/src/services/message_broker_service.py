@@ -19,7 +19,7 @@ class MessageBrokerService:
         )
         self.queue_name = "bunny_tube"
 
-    def send_message(self, *args, priority_: int = 0, **kwargs):
+    def send_message(self, *args, _priority: int = 0, **kwargs):
         self.celery_worker.send_task(
-            f"worker.chemtool_task", queue=self.queue_name, priority=priority_, args=args, kwargs=kwargs
+            f"worker.chemtool_task", queue=self.queue_name, priority=_priority, args=args, kwargs=kwargs
         )

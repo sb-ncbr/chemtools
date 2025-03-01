@@ -19,15 +19,14 @@ class FilesystemStorageService(FileStorageService):
         super().__init__(*args, **kwargs)
 
     # NOTE if there is a directory in zip file, it fails
-    async def push_file(self, file_name: str, file_bytes: bytes, token: uuid.UUID | None = None) -> uuid.UUID:
-        if token is None:
-            token = uuid.uuid4()
+    async def push_file(self, file_name: str, file_bytes: bytes) -> uuid.UUID:
+        file_stem, extension = os.path.splitext(file_name)
+        object_name = f"{file_stem}_{uuid.uuid4()}{extension}"
 
-        _, extension = os.path.splitext(file_name)
         try:
-            async with aiofiles.open(f"{self._DATA_DIR}/{token}{extension}", "wb") as file:
+            async with aiofiles.open(object_name, "wb") as file:
                 await file.write(file_bytes)
-            return token
+            return object_name
         except FileNotFoundError:
             raise HTTPException(
                 status_code=400, detail=f"Unable to save file {file_name}. Zip file maybe contains directories?"

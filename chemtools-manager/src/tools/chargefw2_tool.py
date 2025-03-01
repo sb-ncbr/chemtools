@@ -13,7 +13,7 @@ from api.schemas.charge import (
     ChargeSuitableMethodsResponseDto,
 )
 from tools import BaseDockerizedTool
-from utils import ROOT_DIR
+from conf.const import ROOT_DIR
 
 
 class ChargeFW2Tool(BaseDockerizedTool):
@@ -22,7 +22,7 @@ class ChargeFW2Tool(BaseDockerizedTool):
 
     def _get_cmd_params(
         self,
-        input_file: str,
+        input_files: list[str],
         mode: ChargeModeEnum,
         token: str = '',
         ignore_water: bool = False,
@@ -32,7 +32,7 @@ class ChargeFW2Tool(BaseDockerizedTool):
         parameter: str = '',
         **_,
     ) -> str:
-        in_path = os.path.abspath(f"/data/in/{input_file}")
+        in_path = os.path.abspath(f"/data/in/{input_files[0]}")
         out_path = os.path.abspath(f"/data/out/{token}")
 
         base_args = f"--mode {mode} --input-file {in_path}"
@@ -41,35 +41,25 @@ class ChargeFW2Tool(BaseDockerizedTool):
         parameters = f"{f' --method {method}' if method else ''}{f' --par-file {parameter}' if parameter else ''}"
         return f"{base_args}{out_param}{flags}{parameters}"
 
-    async def _preprocess(self, **kwargs) -> uuid.UUID:
-        token = await super()._preprocess(**kwargs)
-        if token is not None:
-            os.makedirs(ROOT_DIR / f"data/docker/chargefw2/out/{token}", exist_ok=True)
-        return token
+    async def _postprocess(self, *, _output: str, input_files: str, token: uuid.UUID, mode: ChargeModeEnum, **_) -> str:
+        if mode == ChargeModeEnum.info:
+            parsed_data = self.parse_info_output(_output)
+            return ChargeInfoResponseDto(**parsed_data).model_dump_json()
 
-    async def _postprocess(
-        self, *, _output: str, input_file: str, token: uuid.UUID = None, mode: ChargeModeEnum, **kwargs
-    ) -> Any:
-        print('reached postprocess')
-        match mode:
-            case ChargeModeEnum.info:
-                parsed_data = self.parse_info_output(_output)
-                return ChargeInfoResponseDto(**parsed_data)
+        elif mode == ChargeModeEnum.charges:
+            response_files = await self.get_charge_response_files(token, input_files[0])
+            return ChargeResponseDto(**response_files).model_dump_json()
 
-            case ChargeModeEnum.charges:
-                response_files = await self.get_charge_response_files(token, input_file)
-                return ChargeResponseDto(**response_files)
+        elif mode == ChargeModeEnum.suitable_methods:
+            methods, parameters = self.calculate_suitable_methods(_output)
+            return ChargeSuitableMethodsResponseDto(methods=methods, parameters=parameters).model_dump_json()
 
-            case ChargeModeEnum.suitable_methods:
-                methods, parameters = self.calculate_suitable_methods(_output)
-                return ChargeSuitableMethodsResponseDto(methods=methods, parameters=parameters)
+        elif mode == ChargeModeEnum.best_parameters:
+            best_params = self.parse_best_params(_output)
+            return ChargeBestParametersResponseDto(best_parameters=best_params).model_dump_json()
 
-            case ChargeModeEnum.best_parameters:
-                best_params = self.parse_best_params(_output)
-                return ChargeBestParametersResponseDto(best_parameters=best_params)
-
-            case _:
-                raise NotImplementedError(f"Mode {mode} is not implemented for chargefw2 tool")
+        else:
+            raise NotImplementedError(f"Mode {mode} is not implemented for chargefw2 tool")
 
     def _get_error(self, msg):
         return f"ChargeFW2 calculation failed: {msg}"

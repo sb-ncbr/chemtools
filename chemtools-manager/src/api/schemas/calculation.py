@@ -1,12 +1,16 @@
 import uuid
 
 from api.enums import DockerizedToolEnum
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
+
+from db.models.calculation import CalculationStatusEnum
 
 
 class CalculationDto(BaseModel):
     id: uuid.UUID
     tool_name: DockerizedToolEnum
+    status: CalculationStatusEnum
+    input_files: list[str] | None = None
+    input_data: dict | None = None
     user_id: uuid.UUID | None = None
-
-    model_config = ConfigDict(from_attributes=True)
+    result: str | None = None

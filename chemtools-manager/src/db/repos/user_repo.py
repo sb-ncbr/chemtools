@@ -7,8 +7,8 @@ from db.models.calculation import CalculationModel
 
 
 class UserRepo(BaseRepo):
-    def __init__(self, db: AsyncSession):
-        super().__init__(db, UserModel)
+    _model = UserModel
 
-    def get_calculations(self, user_id: uuid.UUID) -> list[CalculationModel]:
-        return self.db.query(CalculationModel).filter(CalculationModel.user_id == user_id).all()
+    async def get_calculations(self, user_id: uuid.UUID) -> list[CalculationModel]:
+        async with self.session_manager.session() as db:
+            return db.query(CalculationModel).filter(CalculationModel.user_id == user_id).all()

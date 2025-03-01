@@ -12,9 +12,9 @@ class DatabaseSessionManager:
         self._engine: AsyncEngine | None = None
         self._sessionmaker: async_sessionmaker | None = None
 
-    def init(self, host: str):
-        self._engine = create_async_engine(host)
-        self._sessionmaker = async_sessionmaker(autocommit=False, bind=self._engine)
+    def init(self, db_url: str):
+        self._engine = create_async_engine(db_url)
+        self._sessionmaker = async_sessionmaker(bind=self._engine)
 
     async def close(self):
         if self._engine is None:
@@ -55,11 +55,3 @@ class DatabaseSessionManager:
 
     async def drop_all(self, connection: AsyncConnection):
         await connection.run_sync(Base.metadata.drop_all)
-
-
-sessionmanager = DatabaseSessionManager()
-
-
-async def get_db():
-    async with sessionmanager.session() as session:
-        yield session

@@ -1,6 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from utils import ROOT_DIR
+from conf.const import ROOT_DIR
 
 
 class BaseEnvSettings(BaseSettings):
@@ -27,7 +27,7 @@ class PostgresSettings(BaseEnvSettings):
     @property
     def postgres_url(self):
         return (
-            f"postgres+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+            f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
             f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
         )
 

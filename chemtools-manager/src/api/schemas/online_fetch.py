@@ -19,4 +19,4 @@ class FetchOnlineFileRequestDto(BaseModel):
 
 
 class FetchOnlineFileResponseDto(BaseModel):
-    token: uuid.UUID
+    file: str

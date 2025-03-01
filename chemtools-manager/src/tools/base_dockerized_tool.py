@@ -6,12 +6,15 @@ import time
 import uuid
 
 import docker
-from fastapi import HTTPException
 
 from services.file_storage_service import FileStorageService
-from utils import ROOT_DIR
+from conf.const import ROOT_DIR
 
 logger = logging.getLogger(__name__)
+
+
+class ContainerRuntimeError(RuntimeError):
+    pass
 
 
 class BaseDockerizedTool(abc.ABC):
@@ -35,19 +38,12 @@ class BaseDockerizedTool(abc.ABC):
     def _get_docker_run_kwargs(self, **_) -> dict:
         return self.docker_run_kwargs
 
-    async def _preprocess(
-        self,
-        *,
-        input_file: str | None = None,
-        input_files: list[str] | None = None,
-        **_,
-    ) -> None:
-        input_files = [*(input_files or []), *(input_file or [])]
+    async def _preprocess(self, *, input_files: list[str], **_) -> None:
         if not input_files:
             raise ValueError("Either input_files or input_file must be provided")
 
         os.makedirs(ROOT_DIR / f"data/docker/{self.image_name}/in", exist_ok=True)
-        await self._file_storage_service.download_files(input_files, ROOT_DIR /f"data/docker/{self.image_name}/in/")
+        await self._file_storage_service.download_files(input_files, ROOT_DIR / f"data/docker/{self.image_name}/in/")
 
     async def _postprocess(self, *, _output: str, token: uuid.UUID, **kwargs) -> str:
         file_names_to_push = self._get_output_files(_output=_output, **kwargs)
@@ -78,14 +74,14 @@ class BaseDockerizedTool(abc.ABC):
             )
         except docker.errors.ContainerError as e:
             logger.error(f"Docker run failed on error: {e}")
-            raise HTTPException(status_code=400, detail=self._get_error(e.stderr.decode("utf-8")))
+            raise ContainerRuntimeError(self._get_error(e.stderr.decode("utf-8")))
 
         try:
             logger.debug(f"Docker run finished. Invoking postprocess")
             postprocessed_result = await self._postprocess(_output=calculation_result.decode(), **kwargs)
         except Exception as e:
-            logger.error(f"Postprocess error: {e}")
-            raise HTTPException(status_code=500, detail="An error occurred during postprocessing")
+            logger.exception(f"Postprocess error: {e}")
+            raise RuntimeError("An error occurred during postprocessing. Please contact the administrator")
 
         time_total = time.time() - start_time
         logger.info(f"Tool {self.image_name} finished successfully in {time_total:.2f} seconds")

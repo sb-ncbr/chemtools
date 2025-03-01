@@ -9,4 +9,4 @@ class UploadRequestDto(BaseModel):
 
 
 class UploadResponseDto(BaseModel):
-    tokens: list[uuid.UUID]
+    files: list[str]

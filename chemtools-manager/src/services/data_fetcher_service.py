@@ -11,7 +11,7 @@ class OnlineFileFetcherService:
     def __init__(self, fetcher_client: OnlineFileFetcherClient):
         self.__fetcher_client = fetcher_client
 
-    async def fetch_data(self, data: FetchOnlineFileRequestDto) -> uuid.UUID:
+    async def fetch_data(self, data: FetchOnlineFileRequestDto) -> str:
         if not (site_url := data.site.get_site_url()):
             raise NotImplementedError(f'Missing url mapping for "{data.site}" site')
 

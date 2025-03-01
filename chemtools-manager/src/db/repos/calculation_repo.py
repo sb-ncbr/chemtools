@@ -4,5 +4,4 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class CalculationRepo(BaseRepo):
-    def __init__(self, db: AsyncSession):
-        super().__init__(db, CalculationModel)
+    _model = CalculationModel

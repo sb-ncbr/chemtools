@@ -1,38 +1,31 @@
-import logging
+from contextlib import asynccontextmanager
 
-from utils import ROOT_DIR, get_project_version, load_yml
+from db.database import DatabaseSessionManager
+from utils import get_project_version, init_app_di, init_logging
 import uvicorn
 from fastapi import FastAPI
 
-from conf.settings import AppSettings
+from conf.settings import AppSettings, PostgresSettings
 from api.routers import router_list
 from containers import AppContainer
 from dependency_injector.wiring import Provide, inject
 
 
-def init_app_di() -> None:
-    container = AppContainer()
-    container.wire(
-        modules=[
-            __name__,
-            "api.routers.io_router",
-            "api.routers.system_router",
-            "api.routers.tools_router",
-            "containers",
-        ]
-    )
-
-
 @inject
-def init_logging(app_settings: AppSettings = Provide[AppContainer.app_settings]) -> None:
-    logging.basicConfig(level=app_settings.LOG_LEVEL)
-    config = load_yml(ROOT_DIR / "src/conf/logger.yml")
-    logging.config.dictConfig(config)
+def init_app(
+    app_settings: AppSettings = Provide[AppContainer.app_settings],
+    db_settings: PostgresSettings = Provide[AppContainer.postgres_settings],
+    session_manager: DatabaseSessionManager = Provide[AppContainer.session_manager],
+) -> FastAPI:
+    @asynccontextmanager
+    async def lifespan(_: FastAPI):
+        yield
+        if session_manager._engine is not None:
+            await session_manager.close()
 
-
-@inject
-def init_app(app_settings: AppSettings = Provide[AppContainer.app_settings]) -> FastAPI:
-    app = FastAPI(title="ChemtoolsAPI", version=get_project_version())
+    init_logging(app_settings)
+    session_manager.init(db_settings.postgres_url)
+    app = FastAPI(title="ChemtoolsAPI", version=get_project_version(), lifespan=lifespan)
     for app_router in router_list:
         app.include_router(app_router)
 
@@ -40,7 +33,6 @@ def init_app(app_settings: AppSettings = Provide[AppContainer.app_settings]) -> 
 
 
 init_app_di()
-init_logging()
 app, app_settings = init_app()
 
 if __name__ == "__main__":

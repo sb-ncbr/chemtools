@@ -1,7 +1,11 @@
+from typing import TYPE_CHECKING
 from datetime import UTC, datetime
 import uuid
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from db.database import Base
+
+if TYPE_CHECKING:
+    from db.models import CalculationModel
 
 
 class UserModel(Base):
@@ -20,6 +24,8 @@ class UserModel(Base):
     updated_at: Mapped[datetime] = mapped_column(default=lambda: datetime.now(UTC))
 
     queue_priority: Mapped[int] = mapped_column(default=0)
+
+    calculations: Mapped[list["CalculationModel"]] = relationship(back_populates="user")
 
     @property
     def full_name(self) -> str:

@@ -24,17 +24,17 @@ class IORouter:
         self.__storage_service = storage_service
         self.__fetcher_service = fetcher_service
 
-    @io_router.post("/custom_files/")
+    @io_router.post("/custom_files")
     async def upload_custom_files(self, data: Annotated[UploadRequestDto, File()]) -> UploadResponseDto:
-        file_tokens = await self.__storage_service.upload_files_from_request(data)
-        return UploadResponseDto(tokens=file_tokens)
+        files = await self.__storage_service.upload_files_from_request(data)
+        return UploadResponseDto(files=files)
 
-    @io_router.get("/supported_site_extensions/")
+    @io_router.get("/supported_site_extensions")
     async def get_supported_site_extensions(self, site: MoleculeRepoSiteEnum) -> list[MoleculeFileExtensionEnum]:
         supported_extensions = self.__fetcher_service.get_supported_extensions(site)
         return supported_extensions
 
-    @io_router.post("/fetch_online_file/")
+    @io_router.post("/fetch_online_file")
     async def fetch_online_file(self, data: FetchOnlineFileRequestDto) -> FetchOnlineFileResponseDto:
-        token = await self.__fetcher_service.fetch_data(data)
-        return FetchOnlineFileResponseDto(token=token)
+        file_name = await self.__fetcher_service.fetch_data(data)
+        return FetchOnlineFileResponseDto(file=file_name)

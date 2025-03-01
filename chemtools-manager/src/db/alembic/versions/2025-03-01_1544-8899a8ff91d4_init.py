@@ -1,8 +1,8 @@
 """init
 
-Revision ID: 07b5802507fd
+Revision ID: 8899a8ff91d4
 Revises: 
-Create Date: 2025-02-28 22:15:48.880375
+Create Date: 2025-03-01 15:44:56.823514
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '07b5802507fd'
+revision: str = '8899a8ff91d4'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -36,10 +36,11 @@ def upgrade() -> None:
     )
     op.create_table('calculations',
     sa.Column('id', sa.Uuid(), nullable=False),
-    sa.Column('tool_name', sa.String(), nullable=False),
-    sa.Column('status', sa.Enum('pending', 'running', 'success', 'failure', name='calculationstatus'), nullable=False),
+    sa.Column('tool_name', sa.Enum('chargefw2', 'mole2', 'gesamt', name='dockerizedtoolenum'), nullable=False),
+    sa.Column('status', sa.Enum('pending', 'running', 'success', 'failure', name='calculationstatusenum'), nullable=False),
     sa.Column('result', sa.String(), nullable=True),
     sa.Column('user_id', sa.Uuid(), nullable=True),
+    sa.Column('user_ip', sa.String(), nullable=True),
     sa.Column('time_started', sa.DateTime(), nullable=True),
     sa.Column('time_finished', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),

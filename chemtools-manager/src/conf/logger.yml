@@ -17,7 +17,7 @@ handlers:
     class: logging.FileHandler
     level: INFO
     formatter: default
-    filename: ext://utils.LOGGING_PATH
+    filename: ext://conf.const.LOGGING_PATH
     mode: a
 
 root:

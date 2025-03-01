@@ -4,6 +4,7 @@ import re
 from api.schemas.gesamt import GesamtInputDto, GesamtResponseDto
 from tools import BaseDockerizedTool
 
+
 #
 class GesamtTool(BaseDockerizedTool):
     image_name = "gesamt"
@@ -18,7 +19,6 @@ class GesamtTool(BaseDockerizedTool):
         return result
 
     async def _postprocess(self, *, input_data: list[GesamtInputDto], _output: str, **_) -> dict:
-        print(_output)
         if len(input_data) == 2:
             return self.__parse_output_2_files(_output)
         return self.__parse_output_more_files(_output)

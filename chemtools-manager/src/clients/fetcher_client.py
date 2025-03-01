@@ -16,11 +16,11 @@ class OnlineFileFetcherClient:
     def __init__(self, storage_service: 'FileStorageService'):
         self.__storage_service = storage_service
 
-    async def fetch_from(self, site_url: str, data: 'FetchOnlineFileRequestDto') -> uuid.UUID:
+    async def fetch_from(self, site_url: str, data: 'FetchOnlineFileRequestDto') -> str:
         data_bytes = await self._download(site_url.format(**data.model_dump()))
         file_name = f"{data.molecule_id}.{data.extension}"
-        token = await self.__storage_service.push_file(file_name, data_bytes)
-        return token
+        remote_file = await self.__storage_service.push_file(file_name, data_bytes)
+        return remote_file
 
     async def _download(self, full_url: str) -> dict:
         logger.info(f"Downloading file from url={full_url}")

@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class FileStorageService(abc.ABC):
     @abc.abstractmethod
-    async def push_file(self, file_name: str, file_bytes: bytes, token: uuid.UUID | None = None) -> uuid.UUID:
+    async def push_file(self, file_name: str, file_bytes: bytes) -> uuid.UUID:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -43,14 +43,14 @@ class FileStorageService(abc.ABC):
         for request_file in data.files:
             if request_file.content_type == "application/zip":
                 for file_name, file_func_wrapper in unzip_files(request_file.file).items():
-                    token = await self.push_file(file_name=file_name, file_bytes=file_func_wrapper())
-                    created_tokens.append(token)
+                    remote_name = await self.push_file(file_name=file_name, file_bytes=file_func_wrapper())
+                    created_tokens.append(remote_name)
 
             else:
-                token = await self.push_file(
+                remote_name = await self.push_file(
                     file_name=request_file.filename,
                     file_bytes=await request_file.read(),
                 )
-                created_tokens.append(token)
+                created_tokens.append(remote_name)
 
         return created_tokens

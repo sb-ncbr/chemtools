@@ -1,9 +1,9 @@
+import os
 import uuid
 import io
 from minio import Minio
 from minio.error import S3Error
 
-from api.schemas.upload import UploadRequestDto
 from conf.settings import MinIOSettings
 from services import FileStorageService
 
@@ -21,9 +21,9 @@ class MinIOClient(FileStorageService):
         if not self.client.bucket_exists(self.bucket_name):
             self.client.make_bucket(self.bucket_name)
 
-    async def push_file(self, file_name: str, file_bytes: bytes, token: uuid.UUID | None = None) -> uuid.UUID:
-        file_id = token or uuid.uuid4()
-        object_name = f"{file_id}_{file_name}"
+    async def push_file(self, file_name: str, file_bytes: bytes) -> uuid.UUID:
+        file_stem, extension = os.path.splitext(file_name)
+        object_name = f"{file_stem}_{uuid.uuid4()}{extension}"
 
         try:
             self.client.put_object(
@@ -36,7 +36,7 @@ class MinIOClient(FileStorageService):
         except S3Error as e:
             raise RuntimeError(f"Failed to upload file: {e}")
 
-        return file_id
+        return object_name
 
     async def fetch_file(self, file_name: str) -> bytes:
         try:
