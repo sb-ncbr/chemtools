@@ -9,7 +9,7 @@ from conf.settings import MinIOSettings
 from services import FileStorageService
 
 
-class MinIOClient(FileStorageService):
+class MinIOService(FileStorageService):
     def __init__(self, minio_settings: MinIOSettings):
         self.client = Minio(
             endpoint=minio_settings.minio_endpoint,
@@ -22,7 +22,7 @@ class MinIOClient(FileStorageService):
         if not self.client.bucket_exists(self.bucket_name):
             self.client.make_bucket(self.bucket_name)
 
-    async def push_file(self, file_name: str, file_bytes: bytes) -> uuid.UUID:
+    async def push_file(self, file_name: str, file_bytes: bytes) -> str:
         file_stem, extension = os.path.splitext(file_name)
         object_name = f"{file_stem}_{uuid.uuid4()}{extension}"
 

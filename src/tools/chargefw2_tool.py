@@ -43,6 +43,11 @@ class ChargeFW2Tool(BaseDockerizedTool):
         parameters = f"{f' --method {method}' if method else ''}{f' --par-file {parameter}' if parameter else ''}"
         return f"{base_args}{out_param}{flags}{parameters}"
 
+    async def _preprocess(self, token: uuid.UUID, input_files: list[str], mode: ChargeModeEnum, **_) -> None:
+        if mode == ChargeModeEnum.charges:
+            os.makedirs(ROOT_DIR / f"data/docker/chargefw2/out/{token}", exist_ok=True)
+        await super()._preprocess(input_files=input_files)
+
     async def _postprocess(self, *, _output: str, input_files: str, token: uuid.UUID, mode: ChargeModeEnum, **_) -> str:
         if mode == ChargeModeEnum.info:
             parsed_data = self.parse_info_output(_output)
@@ -124,9 +129,9 @@ class ChargeFW2Tool(BaseDockerizedTool):
             "cif": {file_name.split(".")[0]: file_name for file_name in file_names if file_name.endswith(".cif")},
         }
         all_suffixes.discard("cif")
-        await self._push_output_files(
-            token,
+        await self._file_storage_service.upload_files(
             [response_files[suffix].removesuffix(f".{suffix}") + f".sdf.{suffix}" for suffix in all_suffixes]
             + list(response_files["cif"].values()),
+            ROOT_DIR / f"data/docker/chargefw2/out/{token}",
         )
         return response_files

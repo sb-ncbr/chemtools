@@ -3,7 +3,7 @@ from services.data_fetcher_service import OnlineFileFetcherService
 from services.file_storage_service import FileStorageService
 from services.filesystem_storage_service import FilesystemStorageService
 from services.message_broker_service import MessageBrokerService
-from services.minio_storage_service import MinIOClient
+from services.minio_storage_service import MinIOService
 from services.user_service import UserService
 
 __all__ = [
@@ -11,7 +11,7 @@ __all__ = [
     "FileStorageService",
     "FilesystemStorageService",
     "OnlineFileFetcherService",
-    "MinIOClient",
+    "MinIOService",
     "MessageBrokerService",
     "UserService",
 ]

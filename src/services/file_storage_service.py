@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class FileStorageService(abc.ABC):
     @abc.abstractmethod
-    async def push_file(self, file_name: str, file_bytes: bytes) -> uuid.UUID:
+    async def push_file(self, file_name: str, file_bytes: bytes) -> str:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -36,19 +36,20 @@ class FileStorageService(abc.ABC):
 
     # NOTE there might be a filename collision when unzipping files from multiple zip files or
     # when uploading additional files with the same name
-    async def upload_files_from_request(self, data: UploadRequestDto) -> list[uuid.UUID]:
-        created_tokens = []
+    async def upload_files_from_request(self, data: UploadRequestDto) -> list[str]:
+        created_files = []
         for request_file in data.files:
+            # NOTE if there is a directory in zip file, it fails
             if request_file.content_type == "application/zip":
                 for file_name, file_func_wrapper in unzip_files(request_file.file).items():
                     remote_name = await self.push_file(file_name=file_name, file_bytes=file_func_wrapper())
-                    created_tokens.append(remote_name)
+                    created_files.append(remote_name)
 
             else:
                 remote_name = await self.push_file(
                     file_name=request_file.filename,
                     file_bytes=await request_file.read(),
                 )
-                created_tokens.append(remote_name)
+                created_files.append(remote_name)
 
-        return created_tokens
+        return created_files

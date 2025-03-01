@@ -35,7 +35,7 @@ class AppContainer(containers.DeclarativeContainer):
         user_repo=user_repo,
     )
     file_storage_service = providers.Singleton(
-        services.MinIOClient,
+        services.MinIOService,
         minio_settings=minio_settings,
     )
     online_file_fetcher_client = providers.Singleton(
@@ -60,7 +60,7 @@ class WorkerContainer(containers.DeclarativeContainer):
     docker = providers.Singleton(docker.from_env)
 
     file_storage_service = providers.Singleton(
-        services.MinIOClient,
+        services.MinIOService,
         minio_settings=AppContainer.minio_settings,
     )
 
