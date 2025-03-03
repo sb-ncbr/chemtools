@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi_utils.cbv import cbv
 
 from api.schemas.calculation import TaskInfoResponseDto
-from api.schemas.pipeline import CreatePipelineDto, PipelineDto, UpdatePipelineDto
+from api.schemas.pipeline import CreatePipelineDto, PipelineDto
 from containers import AppContainer
 from services.pipeline_service import PipelineService
 
@@ -23,29 +23,15 @@ class PipelinesRouter:
 
     @pipelines_router.get("/pipeline/{pipeline_id}")
     async def get_pipeline(self, pipeline_id: uuid.UUID) -> PipelineDto:
-        if (pipeline := await self.pipeline_service.get_pipeline(pipeline_id)) is None:
-            raise HTTPException(status_code=404, detail="Pipeline not found")
-        return pipeline
+        try:
+            return await self.pipeline_service.get_pipeline(pipeline_id)
+        except ValueError as e:
+            raise HTTPException(status_code=404, detail=str(e))
+
+    @pipelines_router.get("/user/{user_id}/pipelines")
+    async def get_user_pipelines(self, user_id: uuid.UUID) -> list[PipelineDto]:
+        return await self.pipeline_service.get_user_pipelines(user_id)
 
     @pipelines_router.post("/pipeline", status_code=201)
     async def create_pipeline(self, data: CreatePipelineDto) -> PipelineDto:
-        if (pipeline := await self.pipeline_service.create_pipeline(data)) is None:
-            raise HTTPException(status_code=404, detail="User not found")
-        return pipeline
-
-    @pipelines_router.put("/pipeline/{pipeline_id}")
-    async def update_pipeline(self, pipeline_id: uuid.UUID, data: UpdatePipelineDto) -> PipelineDto:
-        if (pipeline := await self.pipeline_service.update_pipeline(pipeline_id, data)) is None:
-            raise HTTPException(status_code=404, detail="Pipeline not found")
-        return pipeline
-
-    @pipelines_router.delete("/pipeline", status_code=204)
-    async def delete_pipeline(self, pipeline_id: uuid.UUID) -> None:
-        if not (await self.pipeline_service.delete_pipeline(pipeline_id)):
-            raise HTTPException(status_code=404, detail="Pipeline not found")
-
-    @pipelines_router.post("/pipeline/run")
-    async def run_pipeline(self, pipeline_id: uuid.UUID) -> TaskInfoResponseDto:
-        if (task_info := await self.pipeline_service.run_pipeline(pipeline_id)) is None:
-            raise HTTPException(status_code=404, detail="Pipeline not found")
-        return task_info
+        return await self.pipeline_service.create_pipeline(data)

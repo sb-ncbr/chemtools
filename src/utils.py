@@ -40,8 +40,6 @@ def init_app_di() -> None:
             "api.routers.tools_router",
             "api.routers.calculations_router",
             "api.routers.pipelines_router",
-            "api.routers.pipeline_items_router",
-            "api.routers.users_router",
             "containers",
         ]
     )

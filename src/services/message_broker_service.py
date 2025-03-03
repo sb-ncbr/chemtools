@@ -8,16 +8,19 @@ class MessageBrokerService:
         self.celery_worker = Celery(
             "worker",
             broker=rabbitmq_settings.rabbitmq_url,
-            worker_prefetch_multiplier=1,
             task_queues={
-                "bunny_tube": {
-                    "exchange": "bunny_tube",
-                    "routing_key": "bunny_tube",
-                    "queue_arguments": {"x-max-priority": 2},
-                }
+                "free_queue": {
+                    "exchange": "free_queue",
+                    "routing_key": "free_queue",
+                },
+                "pipeline_queue": {
+                    "exchange": "pipeline_queue",
+                    "routing_key": "pipeline_queue",
+                },
             },
+            broker_connection_retry_on_startup=True,
+            worker_prefetch_multiplier=1,
         )
-        self.queue_name = "bunny_tube"
 
-    def send_message(self, *args, _task_name: str, _priority: int = 0, **kwargs):
-        self.celery_worker.send_task(_task_name, queue=self.queue_name, priority=_priority, args=args, kwargs=kwargs)
+    def send_calculation_message(self, *args, _queue: str, **kwargs):
+        self.celery_worker.send_task("worker.calculation_task", queue=_queue, args=args, kwargs=kwargs)

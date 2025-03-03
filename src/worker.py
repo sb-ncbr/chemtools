@@ -28,11 +28,14 @@ def init_worker(
         "worker",
         broker=rabbitmq_settings.rabbitmq_url,
         task_queues={
-            "bunny_tube": {
-                "exchange": "bunny_tube",
-                "routing_key": "bunny_tube",
-                "queue_arguments": {"x-max-priority": 2},
-            }
+            "free_queue": {
+                "exchange": "free_queue",
+                "routing_key": "free_queue",
+            },
+            "pipeline_queue": {
+                "exchange": "pipeline_queue",
+                "routing_key": "pipeline_queue",
+            },
         },
         broker_connection_retry_on_startup=True,
         worker_prefetch_multiplier=1,
@@ -48,13 +51,6 @@ async def run_calculation_task(
     await worker_service.run_calculation_async(data)
 
 
-@inject
-async def run_pipeline_task(
-    data: dict, worker_service: WorkerService = Provide[WorkerContainer.worker_service]
-) -> None:
-    await worker_service.run_calculation_async(data)
-
-
 init_worker_di()
 worker = init_worker()
 
@@ -62,8 +58,3 @@ worker = init_worker()
 @worker.task
 def calculation_task(data: dict) -> None:
     asyncio.run(run_calculation_task(data))
-
-
-@worker.task
-def pipeline_task(data: dict) -> None:
-    asyncio.run(run_pipeline_task(data))

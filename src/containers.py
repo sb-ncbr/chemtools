@@ -2,18 +2,16 @@ import docker
 from dependency_injector import containers, providers
 
 import clients
-from services.calculation_service import CalculationService
-from services.pipeline_item_service import PipelineItemService
-from services.pipeline_service import PipelineService
-from services.data_fetcher_service import OnlineFileFetcherService
-from services.message_broker_service import MessageBrokerService
-from services.minio_storage_service import MinIOService
-from services.user_service import UserService
-from services.worker_service import WorkerService
 import tools
 from conf import settings
 from db import repos
 from db.database import DatabaseSessionManager
+from services.calculation_service import CalculationService
+from services.data_fetcher_service import OnlineFileFetcherService
+from services.message_broker_service import MessageBrokerService
+from services.minio_storage_service import MinIOService
+from services.pipeline_service import PipelineService
+from services.worker_service import WorkerService
 
 
 class AppContainer(containers.DeclarativeContainer):
@@ -32,14 +30,6 @@ class AppContainer(containers.DeclarativeContainer):
         repos.PipelineRepo,
         session_manager=session_manager,
     )
-    pipeline_item_repo = providers.Singleton(
-        repos.PipelineItemRepo,
-        session_manager=session_manager,
-    )
-    user_repo = providers.Singleton(
-        repos.UserRepo,
-        session_manager=session_manager,
-    )
 
     message_broker_service = providers.Singleton(
         MessageBrokerService,
@@ -52,20 +42,6 @@ class AppContainer(containers.DeclarativeContainer):
     )
     pipeline_service = providers.Singleton(
         PipelineService,
-        pipeline_repo=pipeline_repo,
-        pipeline_item_repo=pipeline_item_repo,
-        user_repo=user_repo,
-        message_broker_service=message_broker_service,
-    )
-    pipeline_item_service = providers.Singleton(
-        PipelineItemService,
-        pipeline_item_repo=pipeline_item_repo,
-        pipeline_repo=pipeline_repo,
-    )
-    user_service = providers.Singleton(
-        UserService,
-        user_repo=user_repo,
-        calculation_request_repo=calculation_request_repo,
         pipeline_repo=pipeline_repo,
     )
     file_storage_service = providers.Singleton(

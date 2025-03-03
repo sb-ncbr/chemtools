@@ -43,11 +43,12 @@ In order to add a new tool, you need to:
 ## TODO
 
 - cache
-- order id
 - make mole great (working) again
+- create user_file
+- save files under name which is hash of the file content
+- health endpoint check api, postgres, rabbitmq, and minio
 - deployment
 
-- authentication and user model
 - write about command injection (_get_cmd_args)
 - gesamt - podpora -s/-d \[kinda done\]
 - gesamt - later finish output parsing for multiple files (more than 3)

@@ -16,7 +16,6 @@ from api.schemas.gesamt import GesamtRequestDto
 from api.schemas.mole import MoleRequestDto
 from containers import AppContainer
 from services.calculation_service import CalculationService
-from services.message_broker_service import MessageBrokerService
 
 logger = logging.getLogger(__name__)
 
@@ -26,12 +25,7 @@ tools_router = APIRouter(tags=["Tools"])
 @cbv(tools_router)
 class ToolsRouter:
     @inject
-    def __init__(
-        self,
-        calculation_service: CalculationService = Depends(Provide[AppContainer.calculation_service]),
-        message_broker_service: MessageBrokerService = Depends(Provide[AppContainer.message_broker_service]),
-    ):
-        self.message_broker = message_broker_service
+    def __init__(self, calculation_service: CalculationService = Depends(Provide[AppContainer.calculation_service])):
         self.calculation_service = calculation_service
 
     @tools_router.get("/chargefw2")

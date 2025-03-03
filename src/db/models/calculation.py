@@ -10,7 +10,6 @@ from api.enums import DockerizedToolEnum
 from db.database import Base
 
 if TYPE_CHECKING:
-    from db.models import UserModel
     from db.models import PipelineModel
 
 
@@ -31,17 +30,15 @@ class CalculationRequestModel(Base):
     input_files: Mapped[list[str]] = mapped_column(JSON)
     input_data: Mapped[dict[str, Any]] = mapped_column(JSON)
 
-    result_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("calculation_results.id"))
+    calculation_result_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("calculation_results.id"))
     pipeline_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("pipelines.id"))
-    file_filter_regex: Mapped[str | None]
-    user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[uuid.UUID | None]
     user_host: Mapped[str | None]
 
     requested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
     calculation_result: Mapped[Optional["CalculationResultModel"]] = relationship(back_populates="calculation_requests")
     pipeline: Mapped[Optional["PipelineModel"]] = relationship(back_populates="calculation_requests")
-    user: Mapped[Optional["UserModel"]] = relationship(back_populates="calculation_requests")
 
 
 class CalculationResultModel(Base):

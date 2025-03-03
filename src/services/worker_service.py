@@ -1,5 +1,5 @@
-from datetime import UTC, datetime
 import logging
+from datetime import UTC, datetime
 
 from api.enums import DockerizedToolEnum
 from api.schemas.calculation import CalculationRequestDto
@@ -8,7 +8,6 @@ from db.repos.calculation_request_repo import CalculationRequestRepo
 from db.repos.calculation_result_repo import CalculationResultRepo
 from tools.base_dockerized_tool import BaseDockerizedTool, ContainerRuntimeError
 from tools.chargefw2_tool import ChargeFW2Tool
-
 from tools.gesamt_tool import GesamtTool
 from tools.mole2_tool import Mole2Tool
 
@@ -75,7 +74,6 @@ class WorkerService:
 
         calculation_result = await self.calculation_result_repo.create(
             CalculationResultModel(
-                # TODO add regex to filter the output files. To optimize, filter them out before saving them to s3.
                 output_files=[],
                 output_data=result,
                 started_at=time_started,
@@ -83,7 +81,3 @@ class WorkerService:
             )
         )
         await self.calculation_request_repo.update(calculation, calculation_result=calculation_result, status=status)
-
-    async def run_pipeline_async(self, data: dict) -> None:
-        print('Running pipeline')
-        print('TODO')

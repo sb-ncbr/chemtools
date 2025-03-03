@@ -4,6 +4,7 @@ from fastapi import Request
 
 from api.enums import DockerizedToolEnum
 from api.schemas.calculation import CalculationRequestDto, CalculationResultDto, TaskInfoResponseDto
+from api.schemas.pipeline import PipelineDto
 from db.models.calculation import CalculationRequestModel, CalculationStatusEnum
 from db.repos.calculation_request_repo import CalculationRequestRepo
 from services.message_broker_service import MessageBrokerService
@@ -42,13 +43,16 @@ class CalculationService:
             requested_at=calculation.requested_at,
         )
 
-        self.message_broker.send_message(
-            _task_name="worker.calculation_task", data=calculation_dto.model_dump(), _priority=0
+        self.message_broker.send_calculation_message(
+            data=calculation_dto.model_dump(),
+            _queue="pipeline_queue" if calculation.pipeline_id else "free_queue",
         )
-        return {"info": "Calculation task enqueued", "token": calculation_dto.id}
+        return TaskInfoResponseDto(info="Calculation task enqueued", token=calculation_dto.id)
 
     async def get_calculation(self, calculation_id: uuid.UUID) -> CalculationRequestDto:
-        calculation = await self.calculation_request_repo.get_calculation_with_result(calculation_id)
+        if not (calculation := await self.calculation_request_repo.get_calculation_with_result(calculation_id)):
+            raise ValueError(f"Calculation not found")
+
         calculation_result = calculation.calculation_result
         return CalculationRequestDto(
             id=calculation.id,
@@ -67,3 +71,7 @@ class CalculationService:
             ),
             requested_at=calculation.requested_at,
         )
+
+    async def get_user_calculations(self, user_id: uuid.UUID) -> list[CalculationRequestDto] | None:
+        user_calculations = await self.calculation_request_repo.filter_by(user_id=user_id)
+        return [CalculationRequestDto.model_validate(calculation) for calculation in user_calculations]

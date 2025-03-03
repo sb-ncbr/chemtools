@@ -1,10 +1,10 @@
 import uuid
 
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+
 from db.models import CalculationRequestModel
 from db.repos.base_repo import BaseRepo
-
-from sqlalchemy.orm import selectinload
 
 
 class CalculationRequestRepo(BaseRepo):
