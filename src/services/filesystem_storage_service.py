@@ -5,7 +5,7 @@ import uuid
 import aiofiles
 
 from conf.const import ROOT_DIR
-from services import FileStorageService
+from services.file_storage_service import FileStorageService
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +32,6 @@ class FilesystemStorageService(FileStorageService):
             raise RuntimeError(f"Unable to save file {file_name}.")
 
     async def fetch_file(self, file_name: str) -> bytes:
-        print('hiiiiiiiiiiiiiii')
-        print(self._DATA_DIR / file_name)
         try:
             async with aiofiles.open(self._DATA_DIR / file_name, "rb") as file:
                 return await file.read()

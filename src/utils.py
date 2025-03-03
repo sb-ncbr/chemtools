@@ -7,7 +7,7 @@ import yaml
 from fastapi import File
 
 from conf.const import ROOT_DIR
-from conf.settings import AppSettings
+from conf.settings import BaseEnvSettings
 
 
 def load_yml(file_path: str):
@@ -39,13 +39,26 @@ def init_app_di() -> None:
             "api.routers.system_router",
             "api.routers.tools_router",
             "api.routers.calculations_router",
+            "api.routers.pipelines_router",
+            "api.routers.pipeline_items_router",
             "api.routers.users_router",
             "containers",
         ]
     )
 
 
-def init_logging(app_settings: AppSettings) -> None:
-    logging.basicConfig(level=app_settings.LOG_LEVEL)
+def init_worker_di() -> None:
+    from containers import WorkerContainer
+
+    container = WorkerContainer()
+    container.wire(
+        modules=[
+            "worker",
+        ]
+    )
+
+
+def init_logging(settings: BaseEnvSettings) -> None:
+    logging.basicConfig(level=settings.LOG_LEVEL)
     config = load_yml(ROOT_DIR / "src/conf/logger.yml")
     logging.config.dictConfig(config)

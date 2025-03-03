@@ -38,9 +38,9 @@ class BaseRepo(abc.ABC):
             result = await db.execute(stmt)
             return result.scalars().first()
 
-    async def filter_by(self, **kwargs) -> Entity | None:
+    async def filter_by(self, **kwargs) -> list[Entity]:
         async with self.session_manager.session() as db:
-            return await db.execute(select(self._model).filter_by(**kwargs)).scalar()
+            return (await db.execute(select(self._model).filter_by(**kwargs))).scalars().all()
 
     async def update(self, entity: Entity, **update_data) -> None:
         async with self.session_manager.session() as db:

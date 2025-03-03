@@ -1,25 +1,54 @@
 # Chemtools Manager
 
+Backend for running calculations using biochemistry tools in separate docker containers.
+It consists of the **API**, which serves as an entrypoint, and the **worker**,
+which is running the calculations inside the docker containers.
+
+## How does it work (TODO)
+
+### Architecture
+
+![Archtecture](docs/architecture.svg)
+
 ## How to run the project locally
+> **NOTE:**  Since the worker doesn't run inside a container, it needs to be run locally within a poetry virtual envirnoment. Therefore, you need to be inside a shell (`poetry shell`) or always use prefix `poetry run` when starting the worker. This applies also for the `alembic` migration utility if you run it from the outide of the *chemtools_api* container.
 
 ### Installation
 
 - Copy `template.env` to `.env` and adjust environment variables as needed
 - Run `poetry install`
-- Run `docker compose build`
+- Run `docker compose up --build`
+- Run `poetry run alembic upgrade head`
 
-### Run Chemtools API
+### Run
 
 - Run `docker compose up` (This runs postgres, rabbitmq, minio, and the API)
-- Run `cd src && ../bin/run_worker.sh` (This runs worker from the `src/` directory)
+- Run `cd src && poetry run ../bin/run_worker.sh` (This runs worker from the `src/` directory)
+
+## Development
+
+### Adding new tools (TODO write more in detail)
+In order to add a new tool, you need to:
+- Build the tool image
+- Write request schema
+- Create new tool class which inherits from `BaseDockerizedTool`
+- Extend `DockerizedToolEnum`, which lists supported tools, and prepare 
+- Create new endpoint/s for the tool.
+
+### Database
+
+- When you make changes in database models, you need to create new alembic migration. Run `poetry run alembic revision --autogenerate -m <rev_name>`
 
 
 ## TODO
 
+- cache
+- order id
+- make mole great (working) again
+- deployment
+
+- authentication and user model
+- write about command injection (_get_cmd_args)
 - gesamt - podpora -s/-d \[kinda done\]
 - gesamt - later finish output parsing for multiple files (more than 3)
-- make mole great (working) again
-- db setup including calculation_id and order, user is just a token
-
-- write about command injection (_get_cmd_args)
-- solve issue with non existing docker directory structure
+- solve issue where I can only run the worker from `src/` folder

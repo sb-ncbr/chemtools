@@ -6,7 +6,7 @@ from minio import Minio
 from minio.error import S3Error
 
 from conf.settings import MinIOSettings
-from services import FileStorageService
+from services.file_storage_service import FileStorageService
 
 
 class MinIOService(FileStorageService):

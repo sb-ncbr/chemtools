@@ -4,13 +4,12 @@ from pydantic import BaseModel
 
 
 class _BaseToolRequestDto(BaseModel):
-    calculation_id: uuid.UUID
-    order: int
+    pass
 
 
-class SingleFileRequestDto(_BaseToolRequestDto):
+class SingleFileRequestDto(BaseModel):
     input_file: str
 
 
-class ManyFilesRequestDto(_BaseToolRequestDto):
+class ManyFilesRequestDto(BaseModel):
     input_files: list[str]

@@ -8,7 +8,8 @@ from api.enums import MoleculeFileExtensionEnum, MoleculeRepoSiteEnum
 from api.schemas.online_fetch import FetchOnlineFileRequestDto, FetchOnlineFileResponseDto
 from api.schemas.upload import UploadRequestDto, UploadResponseDto
 from containers import AppContainer
-from services import FileStorageService, OnlineFileFetcherService
+from services.data_fetcher_service import OnlineFileFetcherService
+from services.file_storage_service import FileStorageService
 
 io_router = APIRouter(tags=["I/O"])
 
@@ -24,17 +25,17 @@ class IORouter:
         self.__storage_service = storage_service
         self.__fetcher_service = fetcher_service
 
-    @io_router.post("/custom_files")
-    async def upload_custom_files(self, data: Annotated[UploadRequestDto, File()]) -> UploadResponseDto:
+    @io_router.post("/upload-files")
+    async def upload_files(self, data: Annotated[UploadRequestDto, File()]) -> UploadResponseDto:
         files = await self.__storage_service.upload_files_from_request(data)
         return UploadResponseDto(files=files)
 
-    @io_router.get("/supported_site_extensions")
+    @io_router.get("/supported-site-extensions")
     async def get_supported_site_extensions(self, site: MoleculeRepoSiteEnum) -> list[MoleculeFileExtensionEnum]:
         supported_extensions = self.__fetcher_service.get_supported_extensions(site)
         return supported_extensions
 
-    @io_router.post("/fetch_online_file")
+    @io_router.post("/fetch-online-file")
     async def fetch_online_file(self, data: FetchOnlineFileRequestDto) -> FetchOnlineFileResponseDto:
         file_name = await self.__fetcher_service.fetch_data(data)
         return FetchOnlineFileResponseDto(file=file_name)
