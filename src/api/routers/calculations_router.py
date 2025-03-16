@@ -6,7 +6,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi_utils.cbv import cbv
 
 from api.schemas.calculation import CalculationRequestDto
-from api.schemas.pipeline import PipelineDto
 from containers import AppContainer
 from services.calculation_service import CalculationService
 

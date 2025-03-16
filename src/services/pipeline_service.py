@@ -12,7 +12,7 @@ class PipelineService:
 
     async def get_pipeline(self, pipeline_id: uuid.UUID) -> PipelineDto | None:
         if (pipeline := await self.pipeline_repo.get_pipeline_with_calculations(pipeline_id)) is None:
-            raise ValueError(f"Pipeline not found")
+            raise ValueError("Pipeline not found")
 
         return PipelineDto(
             id=pipeline.id,

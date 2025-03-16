@@ -5,8 +5,8 @@ from fastapi import APIRouter, Depends, File
 from fastapi_utils.cbv import cbv
 
 from api.enums import MoleculeFileExtensionEnum, MoleculeRepoSiteEnum
-from api.schemas.online_fetch import FetchOnlineFileRequestDto, FetchOnlineFileResponseDto
-from api.schemas.upload import UploadRequestDto, UploadResponseDto
+from api.schemas.fetched_file import FetchOnlineFileRequestDto, FetchOnlineFileResponseDto
+from api.schemas.user_file import UploadRequestDto, UploadResponseDto
 from containers import AppContainer
 from services.data_fetcher_service import OnlineFileFetcherService
 from services.file_storage_service import FileStorageService
@@ -27,7 +27,7 @@ class IORouter:
 
     @io_router.post("/upload-files")
     async def upload_files(self, data: Annotated[UploadRequestDto, File()]) -> UploadResponseDto:
-        files = await self.storage_service.upload_files_from_request(data)
+        files = [file async for file in self.storage_service.upload_files_from_request(data)]
         return UploadResponseDto(files=files)
 
     @io_router.get("/supported-site-extensions")
@@ -37,5 +37,5 @@ class IORouter:
 
     @io_router.post("/fetch-online-file")
     async def fetch_online_file(self, data: FetchOnlineFileRequestDto) -> FetchOnlineFileResponseDto:
-        file_name = await self.fetcher_service.fetch_data(data)
-        return FetchOnlineFileResponseDto(file=file_name)
+        cached, file_name = await self.fetcher_service.fetch_data(data)
+        return FetchOnlineFileResponseDto(file=file_name, cached=cached)

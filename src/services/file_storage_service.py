@@ -1,16 +1,24 @@
 import abc
+import asyncio
+import hashlib
 import logging
 import os
+import uuid
+from typing import AsyncGenerator
 
 import aiofiles
 
-from api.schemas.upload import UploadRequestDto
+from api.schemas.user_file import UploadRequestDto
+from services.file_cache_service import FileCacheService
 from utils import unzip_files
 
 logger = logging.getLogger(__name__)
 
 
 class FileStorageService(abc.ABC):
+    def __init__(self, file_cache_service: FileCacheService):
+        self.file_cache_service = file_cache_service
+
     @abc.abstractmethod
     async def push_file(self, file_name: str, file_bytes: bytes) -> str:
         raise NotImplementedError
@@ -19,10 +27,14 @@ class FileStorageService(abc.ABC):
     async def fetch_file(self, file_name: str) -> bytes:
         raise NotImplementedError
 
-    async def download_files(self, file_names: list[str], to_local_dir: str) -> None:
+    async def download_files(self, file_names: list[str], to_local_dir: str) -> list[str]:
         logger.debug(f"Downloading files={file_names} to {to_local_dir}")
-        for file_name in file_names:
-            file_bytes = await self.fetch_file(file_name)
+        for idx, file_name_hash in enumerate(file_names):
+            file_bytes, file_name = await asyncio.gather(
+                self.fetch_file(file_name), self.file_cache_service.get_file_name(file_name_hash)
+            )
+            # NOTE be careful, this changes input_files
+            file_names[idx] = file_name
             async with aiofiles.open(os.path.join(to_local_dir, file_name), "wb") as file:
                 await file.write(file_bytes)
 
@@ -35,20 +47,23 @@ class FileStorageService(abc.ABC):
 
     # NOTE there might be a filename collision when unzipping files from multiple zip files or
     # when uploading additional files with the same name
-    async def upload_files_from_request(self, data: UploadRequestDto) -> list[str]:
-        created_files = []
+    async def upload_files_from_request(self, data: UploadRequestDto) -> AsyncGenerator[str, None]:
         for request_file in data.files:
             # NOTE if there is a directory in zip file, it fails
             if request_file.content_type == "application/zip":
                 for file_name, file_func_wrapper in unzip_files(request_file.file).items():
-                    remote_name = await self.push_file(file_name=file_name, file_bytes=file_func_wrapper())
-                    created_files.append(remote_name)
-
+                    yield await self.__process_file(file_name, file_func_wrapper(), data.user_id)
             else:
-                remote_name = await self.push_file(
-                    file_name=request_file.filename,
-                    file_bytes=await request_file.read(),
-                )
-                created_files.append(remote_name)
+                yield await self.__process_file(request_file.filename, await request_file.read(), data.user_id)
 
-        return created_files
+    async def __process_file(self, file_name: str, file_content: str, user_id: uuid.UUID) -> str:
+        file_name_hash = self.get_file_hash(file_content)
+        await self.push_file(file_name=file_name_hash, file_bytes=file_content)
+        await self.file_cache_service.create_user_file(user_id, file_name, file_name_hash)
+        return file_name_hash
+
+    @staticmethod
+    def get_file_hash(file_bytes: bytes) -> str:
+        hasher = hashlib.sha256()
+        hasher.update(file_bytes)
+        return hasher.hexdigest()

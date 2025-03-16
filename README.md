@@ -52,4 +52,9 @@ In order to add a new tool, you need to:
 - write about command injection (_get_cmd_args)
 - gesamt - podpora -s/-d \[kinda done\]
 - gesamt - later finish output parsing for multiple files (more than 3)
+- write docstrings
 - solve issue where I can only run the worker from `src/` folder
+
+- test uploading large files. Maybe it will be necessary to upload/download them by chunks
+- thesis idea -> write about invalidating fetched_file cache. Cache can be invalidated just by making a query which deletes the fetched_file records from db.
+- how do I ask for more instances on openstack?

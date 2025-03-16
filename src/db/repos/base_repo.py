@@ -1,5 +1,5 @@
 import abc
-from typing import Any, TypeVar
+from typing import TypeVar
 
 from sqlalchemy import select
 
@@ -24,19 +24,13 @@ class BaseRepo(abc.ABC):
             await db.refresh(entity)
             return entity
 
-    async def get_or_create(self, entity_id: Any, from_dict: dict) -> Entity:
-        entity = await self.get_by_id(entity_id)
-        return entity or self.create(self._model(**from_dict))
-
     async def get_list(self) -> list[Entity]:
         async with self.session_manager.session() as db:
             return (await db.execute(select(self._model))).scalars().all()
 
-    async def get_by_id(self, entity_id: Any) -> Entity | None:
+    async def get_by(self, **kwargs) -> list[Entity]:
         async with self.session_manager.session() as db:
-            stmt = select(self._model).where(self._model.id == entity_id)
-            result = await db.execute(stmt)
-            return result.scalars().first()
+            return (await db.execute(select(self._model).filter_by(**kwargs))).scalars().first()
 
     async def filter_by(self, **kwargs) -> list[Entity]:
         async with self.session_manager.session() as db:

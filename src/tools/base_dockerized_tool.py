@@ -37,18 +37,20 @@ class BaseDockerizedTool(abc.ABC):
     def _get_docker_run_kwargs(self, **_) -> dict:
         return self.docker_run_kwargs
 
-    async def _preprocess(self, *, input_files: list[str], **_) -> None:
+    async def _preprocess(self, *, token, input_files: list[str], **_) -> None:
         if not input_files:
             raise ValueError("Either input_files or input_file must be provided")
 
-        os.makedirs(ROOT_DIR / f"data/docker/{self.image_name}/in", exist_ok=True)
-        await self._file_storage_service.download_files(input_files, ROOT_DIR / f"data/docker/{self.image_name}/in/")
+        os.makedirs(ROOT_DIR / f"data/docker/{self.image_name}/{token}/in", exist_ok=True)
+        await self._file_storage_service.download_files(
+            input_files, ROOT_DIR / f"data/docker/{self.image_name}/{token}/in"
+        )
 
     async def _postprocess(self, *, _output: str, token: uuid.UUID, **kwargs) -> str:
         file_names_to_push = self._get_output_files(_output=_output, **kwargs)
         await self._file_storage_service.upload_files(
             file_names_to_push,
-            ROOT_DIR / f"data/docker/{self.image_name}/out/{token}",
+            ROOT_DIR / f"data/docker/{self.image_name}/{token}/out",
         )
         return _output
 

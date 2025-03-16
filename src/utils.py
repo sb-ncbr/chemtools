@@ -21,7 +21,7 @@ def get_project_version():
         return tomllib.load(file)["tool"]["poetry"]["version"]
 
 
-def unzip_files(self, file: File) -> dict[str, Callable[[str], bytes]]:
+def unzip_files(file: File) -> dict[str, Callable[[str], bytes]]:
     zip_file = ZipFile(file)
     # .read() surrounded in lambda to avoid storing all file contents in memory.
     # Also name=name is needed to avoid late binding.

@@ -5,7 +5,6 @@ from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi_utils.cbv import cbv
 
-from api.schemas.calculation import TaskInfoResponseDto
 from api.schemas.pipeline import CreatePipelineDto, PipelineDto
 from containers import AppContainer
 from services.pipeline_service import PipelineService

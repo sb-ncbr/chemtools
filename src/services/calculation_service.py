@@ -1,19 +1,25 @@
 import uuid
 
-from fastapi import Request
+from fastapi import HTTPException, Request
 
 from api.enums import DockerizedToolEnum
 from api.schemas.calculation import CalculationRequestDto, CalculationResultDto, TaskInfoResponseDto
-from api.schemas.pipeline import PipelineDto
 from db.models.calculation import CalculationRequestModel, CalculationStatusEnum
 from db.repos.calculation_request_repo import CalculationRequestRepo
+from services.file_cache_service import FileCacheService
 from services.message_broker_service import MessageBrokerService
 
 
 class CalculationService:
-    def __init__(self, calculation_request_repo: CalculationRequestRepo, message_broker_service: MessageBrokerService):
+    def __init__(
+        self,
+        calculation_request_repo: CalculationRequestRepo,
+        message_broker_service: MessageBrokerService,
+        file_cache_service: FileCacheService,
+    ):
         self.calculation_request_repo = calculation_request_repo
         self.message_broker = message_broker_service
+        self.file_cache_service = file_cache_service
 
     async def create_calculation(
         self, request: Request, data: dict, tool_name: DockerizedToolEnum
@@ -22,6 +28,9 @@ class CalculationService:
         # If there is one input_file, it will be converted to a list of length 1.
         input_file = data.pop("input_file", None)
         input_files = [*data.pop("input_files", []), *([input_file] if input_file else [])]
+
+        if not await self.file_cache_service.do_files_exist(input_files):
+            raise HTTPException(status_code=404, detail="Input files do not exist")
 
         calculation = await self.calculation_request_repo.create(
             CalculationRequestModel(
@@ -51,7 +60,7 @@ class CalculationService:
 
     async def get_calculation(self, calculation_id: uuid.UUID) -> CalculationRequestDto:
         if not (calculation := await self.calculation_request_repo.get_calculation_with_result(calculation_id)):
-            raise ValueError(f"Calculation not found")
+            raise ValueError("Calculation not found")
 
         calculation_result = calculation.calculation_result
         return CalculationRequestDto(
