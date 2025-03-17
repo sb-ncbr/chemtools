@@ -10,10 +10,10 @@ class GesamtTool(BaseDockerizedTool):
     image_name = "gesamt"
     docker_run_kwargs = {"volumes": {os.path.abspath(ROOT_DIR / "data/docker/gesamt"): {"bind": "/data", "mode": "rw"}}}
 
-    def _get_cmd_params(self, *, input_files: list[str], selection_strings: list[str], **_) -> str:
+    def _get_cmd_params(self, *, token: str, input_files: list[str], selection_strings: list[str], **_) -> str:
         result = " ".join(
             (f"-d {selection_string} " if selection_string is not None else "")
-            + os.path.abspath(f"/data/in/{file_name}")
+            + os.path.abspath(f"/data/{token}/in{file_name}")
             for file_name, selection_string in zip(input_files, selection_strings)
         )
         return result

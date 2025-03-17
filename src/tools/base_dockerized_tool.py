@@ -37,7 +37,7 @@ class BaseDockerizedTool(abc.ABC):
     def _get_docker_run_kwargs(self, **_) -> dict:
         return self.docker_run_kwargs
 
-    async def _preprocess(self, *, token, input_files: list[str], **_) -> None:
+    async def _preprocess(self, *, token: str, input_files: list[str], **_) -> None:
         if not input_files:
             raise ValueError("Either input_files or input_file must be provided")
 

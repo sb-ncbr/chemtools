@@ -31,7 +31,7 @@ class FileStorageService(abc.ABC):
         logger.debug(f"Downloading files={file_names} to {to_local_dir}")
         for idx, file_name_hash in enumerate(file_names):
             file_bytes, file_name = await asyncio.gather(
-                self.fetch_file(file_name), self.file_cache_service.get_file_name(file_name_hash)
+                self.fetch_file(file_name_hash), self.file_cache_service.get_file_name(file_name_hash)
             )
             # NOTE be careful, this changes input_files
             file_names[idx] = file_name

@@ -30,8 +30,8 @@ class ChargeFW2Tool(BaseDockerizedTool):
         parameter: str = "",
         **_,
     ) -> str:
-        in_path = os.path.abspath(f"/data/in/{input_files[0]}")
-        out_path = os.path.abspath(f"/data/out/{token}")
+        in_path = os.path.abspath(f"/data/{token}/in/{input_files[0]}")
+        out_path = os.path.abspath(f"/data/{token}/out")
 
         base_args = f"--mode {mode} --input-file {in_path}"
         out_param = f" --chg-out-dir {out_path}" if mode == ChargeModeEnum.charges else ""
@@ -45,8 +45,8 @@ class ChargeFW2Tool(BaseDockerizedTool):
 
     async def _preprocess(self, token: uuid.UUID, input_files: list[str], mode: ChargeModeEnum, **_) -> None:
         if mode == ChargeModeEnum.charges:
-            os.makedirs(ROOT_DIR / f"data/docker/chargefw2/out/{token}", exist_ok=True)
-        await super()._preprocess(input_files=input_files)
+            os.makedirs(ROOT_DIR / f"data/docker/chargefw2/{token}/out", exist_ok=True)
+        await super()._preprocess(token=token, input_files=input_files)
 
     async def _postprocess(self, *, _output: str, input_files: str, token: uuid.UUID, mode: ChargeModeEnum, **_) -> str:
         if mode == ChargeModeEnum.info:
@@ -122,7 +122,7 @@ class ChargeFW2Tool(BaseDockerizedTool):
         return match.group(1) if match else None
 
     async def get_charge_response_files(self, token: uuid.UUID | None, input_file: str) -> dict:
-        file_names = os.listdir(ROOT_DIR / f"data/docker/chargefw2/out/{token}")
+        file_names = os.listdir(ROOT_DIR / f"data/docker/chargefw2/{token}/out")
         all_suffixes = {file_name.split(".")[-1] for file_name in file_names}
         file_token = f"{input_file.split('.')[0]}"
         response_files = {suffix: f"{file_token}.{suffix}" for suffix in all_suffixes} | {
@@ -132,6 +132,6 @@ class ChargeFW2Tool(BaseDockerizedTool):
         await self._file_storage_service.upload_files(
             [response_files[suffix].removesuffix(f".{suffix}") + f".sdf.{suffix}" for suffix in all_suffixes]
             + list(response_files["cif"].values()),
-            ROOT_DIR / f"data/docker/chargefw2/out/{token}",
+            ROOT_DIR / f"data/docker/chargefw2/{token}/out",
         )
         return response_files
