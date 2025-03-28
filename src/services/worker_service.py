@@ -41,7 +41,8 @@ class WorkerService:
 
         return tool
 
-    async def run_calculation_async(self, data: dict) -> None:
+    async def run_calculation_async(self, **data) -> None:
+        logger.info(f"Received message: {data}")
         calculation_dto = CalculationRequestDto.model_validate(data)
         calculation = await self.calculation_request_repo.get_by(id=calculation_dto.id)
         await self.calculation_request_repo.update(

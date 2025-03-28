@@ -1,9 +1,10 @@
+import json
 import uuid
 
 from fastapi import HTTPException, Request
 
 from api.enums import DockerizedToolEnum
-from api.schemas.calculation import CalculationRequestDto, CalculationResultDto, TaskInfoResponseDto
+from api.schemas.calculation import CalculationRequestDto, TaskInfoResponseDto
 from db.models.calculation import CalculationRequestModel, CalculationStatusEnum
 from db.repos.calculation_request_repo import CalculationRequestRepo
 from services.file_cache_service import FileCacheService
@@ -53,7 +54,7 @@ class CalculationService:
         )
 
         await self.message_broker.send_calculation_message(
-            data=calculation_dto.model_dump_json(),
+            data=json.loads(calculation_dto.model_dump_json()),
             _queue="pipeline_queue" if calculation.pipeline_id else "free_queue",
         )
         return TaskInfoResponseDto(info="Calculation task enqueued", token=calculation_dto.id)

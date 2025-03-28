@@ -1,6 +1,7 @@
 import logging
 
 import aio_pika
+from aio_pika.patterns import JsonMaster
 
 from conf.settings import RabbitMQSettings
 
@@ -13,30 +14,15 @@ class MessageBrokerService:
 
     async def send_calculation_message(self, data: str, _queue: str):
         await self._send_message(
-            rabbitmq_url=self.rabbitmq_settings.rabbitmq_url,
             queue_name=_queue,
             data=data,
         )
 
-    async def _send_message(
-        self,
-        rabbitmq_url: str,
-        queue_name: str,
-        data: str,
-    ):
-        connection = await aio_pika.connect_robust(rabbitmq_url)
+    async def _send_message(self, queue_name: str, data: str, **options) -> None:
+        connection = await aio_pika.connect_robust(self.rabbitmq_settings.rabbitmq_url)
         async with connection:
             channel = await connection.channel()
+            master = JsonMaster(channel)
 
-            await channel.declare_queue(queue_name, durable=True)
-
-            message = aio_pika.Message(
-                body=data.encode(),
-                content_type='application/json',
-                delivery_mode=self.rabbitmq_settings.DELIVERY_MODE,
-            )
-
-            exchange = await channel.get_exchange(queue_name)
-            await exchange.publish(message, routing_key=queue_name)
-
-            logger.info(f"[x] Sent message to {queue_name}: {data}")
+            await master.create_task(channel_name=queue_name, kwargs=data, **options)
+            logger.info(f"[x] Message sent to {queue_name}: {data}")
