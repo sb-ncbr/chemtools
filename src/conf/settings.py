@@ -1,3 +1,4 @@
+from aio_pika import DeliveryMode
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from conf.const import ROOT_DIR
@@ -37,6 +38,7 @@ class RabbitMQSettings(BaseEnvSettings):
     RABBITMQ_PASSWORD: str = "guest"
     RABBITMQ_HOST: str = "localhost"
     RABBITMQ_PORT: int = 5672
+    DELIVERY_MODE: DeliveryMode = DeliveryMode.PERSISTENT
 
     @property
     def rabbitmq_url(self):

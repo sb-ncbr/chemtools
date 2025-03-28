@@ -52,8 +52,8 @@ class CalculationService:
             requested_at=calculation.requested_at,
         )
 
-        self.message_broker.send_calculation_message(
-            data=calculation_dto.model_dump(),
+        await self.message_broker.send_calculation_message(
+            data=calculation_dto.model_dump_json(),
             _queue="pipeline_queue" if calculation.pipeline_id else "free_queue",
         )
         return TaskInfoResponseDto(info="Calculation task enqueued", token=calculation_dto.id)
@@ -62,24 +62,7 @@ class CalculationService:
         if not (calculation := await self.calculation_request_repo.get_calculation_with_result(calculation_id)):
             raise ValueError("Calculation not found")
 
-        calculation_result = calculation.calculation_result
-        return CalculationRequestDto(
-            id=calculation.id,
-            tool_name=calculation.tool_name,
-            status=calculation.status,
-            input_files=calculation.input_files,
-            input_data=calculation.input_data,
-            user_id=calculation.user_id,
-            calculation_result=CalculationResultDto(
-                id=calculation_result.id,
-                output_files=calculation_result.output_files,
-                output_data=calculation_result.output_data,
-                started_at=calculation_result.started_at,
-                finished_at=calculation_result.finished_at,
-                # error_message=calculation_result.error_message,
-            ),
-            requested_at=calculation.requested_at,
-        )
+        return CalculationRequestDto.model_validate(calculation)
 
     async def get_user_calculations(self, user_id: uuid.UUID) -> list[CalculationRequestDto] | None:
         user_calculations = await self.calculation_request_repo.filter_by(user_id=user_id)

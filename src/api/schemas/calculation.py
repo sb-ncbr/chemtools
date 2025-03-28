@@ -22,6 +22,8 @@ class CalculationResultDto[ToolDataDtoT](BaseModel):
     started_at: datetime
     finished_at: datetime
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class CalculationRequestDto[ToolDataDtoT](BaseModel):
     id: uuid.UUID

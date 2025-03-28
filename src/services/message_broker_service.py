@@ -1,26 +1,42 @@
-from celery import Celery
+import logging
+
+import aio_pika
 
 from conf.settings import RabbitMQSettings
+
+logger = logging.getLogger(__name__)
 
 
 class MessageBrokerService:
     def __init__(self, rabbitmq_settings: RabbitMQSettings):
-        self.celery_worker = Celery(
-            "worker",
-            broker=rabbitmq_settings.rabbitmq_url,
-            task_queues={
-                "free_queue": {
-                    "exchange": "free_queue",
-                    "routing_key": "free_queue",
-                },
-                "pipeline_queue": {
-                    "exchange": "pipeline_queue",
-                    "routing_key": "pipeline_queue",
-                },
-            },
-            broker_connection_retry_on_startup=True,
-            worker_prefetch_multiplier=1,
+        self.rabbitmq_settings = rabbitmq_settings
+
+    async def send_calculation_message(self, data: str, _queue: str):
+        await self._send_message(
+            rabbitmq_url=self.rabbitmq_settings.rabbitmq_url,
+            queue_name=_queue,
+            data=data,
         )
 
-    def send_calculation_message(self, *args, _queue: str, **kwargs):
-        self.celery_worker.send_task("worker.calculation_task", queue=_queue, args=args, kwargs=kwargs)
+    async def _send_message(
+        self,
+        rabbitmq_url: str,
+        queue_name: str,
+        data: str,
+    ):
+        connection = await aio_pika.connect_robust(rabbitmq_url)
+        async with connection:
+            channel = await connection.channel()
+
+            await channel.declare_queue(queue_name, durable=True)
+
+            message = aio_pika.Message(
+                body=data.encode(),
+                content_type='application/json',
+                delivery_mode=self.rabbitmq_settings.DELIVERY_MODE,
+            )
+
+            exchange = await channel.get_exchange(queue_name)
+            await exchange.publish(message, routing_key=queue_name)
+
+            logger.info(f"[x] Sent message to {queue_name}: {data}")

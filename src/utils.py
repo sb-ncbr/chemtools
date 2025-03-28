@@ -51,7 +51,7 @@ def init_worker_di() -> None:
     container = WorkerContainer()
     container.wire(
         modules=[
-            "worker",
+            "__main__",
         ]
     )
 
@@ -59,4 +59,6 @@ def init_worker_di() -> None:
 def init_logging(settings: BaseEnvSettings) -> None:
     logging.basicConfig(level=settings.LOG_LEVEL)
     config = load_yml(ROOT_DIR / "src/conf/logger.yml")
+    for logger in ["aio_pika", "urllib3", "docker", "aiormq"]:
+        logging.getLogger(logger).setLevel(logging.INFO)
     logging.config.dictConfig(config)
