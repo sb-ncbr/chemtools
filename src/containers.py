@@ -27,6 +27,10 @@ class AppContainer(containers.DeclarativeContainer):
         repos.CalculationRequestRepo,
         session_manager=session_manager,
     )
+    calculation_result_repo = providers.Singleton(
+        repos.CalculationResultRepo,
+        session_manager=session_manager,
+    )
     pipeline_repo = providers.Singleton(
         repos.PipelineRepo,
         session_manager=session_manager,
@@ -50,6 +54,7 @@ class AppContainer(containers.DeclarativeContainer):
     calculation_service = providers.Singleton(
         CalculationService,
         calculation_request_repo=calculation_request_repo,
+        calculation_result_repo=calculation_result_repo,
         message_broker_service=message_broker_service,
         file_cache_service=file_cache_service,
     )

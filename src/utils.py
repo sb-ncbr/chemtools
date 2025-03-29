@@ -1,3 +1,4 @@
+from typing import TYPE_CHECKING
 import logging
 import tomllib
 from typing import Callable
@@ -7,7 +8,9 @@ import yaml
 from fastapi import File
 
 from conf.const import ROOT_DIR
-from conf.settings import BaseEnvSettings
+
+if TYPE_CHECKING:
+    from conf.settings import BaseEnvSettings
 
 
 def load_yml(file_path: str):
@@ -56,7 +59,7 @@ def init_worker_di() -> None:
     )
 
 
-def init_logging(settings: BaseEnvSettings) -> None:
+def init_logging(settings: 'BaseEnvSettings') -> None:
     logging.basicConfig(level=settings.LOG_LEVEL)
     config = load_yml(ROOT_DIR / "src/conf/logger.yml")
     for logger in ["aio_pika", "urllib3", "docker", "aiormq"]:
