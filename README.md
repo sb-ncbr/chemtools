@@ -15,14 +15,15 @@ which is running the calculations inside the docker containers.
 
 ### Installation
 
-- Copy `template.env` to `.env` and adjust environment variables as needed
-- Run `poetry install`
-- Run `docker compose up --build`
-- Run `poetry run alembic upgrade head`
+1. Copy `template.env` to `.env` and adjust environment variables as needed
+2. Run `poetry install` to install project locally for the worker
+3. Run `docker compose up --build` to build the api along with needed services and start them
+4. Run `poetry run alembic upgrade head` to migrate database
+5. Setup MinIO locally by visiting `http://127.0.0.1:9001/access-keys`, creating access key and updating `.env` file accordingly. *You can skip this step if you store your data in filesystem (using `FilesystemStorageService`)*
 
 ### Run
 
-- Run `docker compose up` to start postgres, rabbitmq, minio, and the API
+- Run `docker compose up` to start the API, postgres, rabbitmq, and minio
 - Run `poetry run python src/worker.py` to start the worker
 
 ## Development
