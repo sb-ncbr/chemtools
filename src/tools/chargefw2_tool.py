@@ -10,6 +10,7 @@ from api.schemas.charge import (
     ChargeResponseDto,
     ChargeSuitableMethodsResponseDto,
 )
+from api.schemas.user_file import UserFileDto
 from conf.const import ROOT_DIR
 from tools import BaseDockerizedTool
 
@@ -48,14 +49,17 @@ class ChargeFW2Tool(BaseDockerizedTool):
             os.makedirs(ROOT_DIR / f"data/docker/chargefw2/{token}/out", exist_ok=True)
         await super()._preprocess(token=token, input_files=input_files)
 
-    async def _postprocess(self, *, _output: str, input_files: str, token: uuid.UUID, mode: ChargeModeEnum, **_) -> str:
+    async def _postprocess(self, *, _output: str, token: uuid.UUID, mode: ChargeModeEnum, **_) -> str:
         if mode == ChargeModeEnum.info:
             parsed_data = self.parse_info_output(_output)
             return ChargeInfoResponseDto(**parsed_data).model_dump_json(), []
 
         elif mode == ChargeModeEnum.charges:
-            files_data, output_files = await super()._postprocess(_output=_output, token=token, input_files=input_files)
-            return ChargeResponseDto().model_dump_json(), output_files
+            file_names = os.listdir(ROOT_DIR / f"data/docker/chargefw2/{token}/out")
+            user_file_dtos = await self._send_files(token=token, file_names=file_names)
+            files_data = self._get_file_data(user_file_dtos=user_file_dtos)
+            file_hashes = [file_obj.file_name_hash for file_obj in user_file_dtos]
+            return ChargeResponseDto(**files_data).model_dump_json(), file_hashes
 
         elif mode == ChargeModeEnum.suitable_methods:
             methods, parameters = self.calculate_suitable_methods(_output)
@@ -68,17 +72,16 @@ class ChargeFW2Tool(BaseDockerizedTool):
         else:
             raise NotImplementedError(f"Mode {mode} is not implemented for chargefw2 tool")
 
-    async def _get_output_files(self, *, token: uuid.UUID, input_files: list[str], **_) -> list[str]:
-        file_names = os.listdir(ROOT_DIR / f"data/docker/chargefw2/{token}/out")
-        all_suffixes = {file_name.split(".")[-1] for file_name in file_names}
-        file_token = f"{input_files[0].split(".")[0]}"
-        response_files = {suffix: f"{file_token}.{suffix}" for suffix in all_suffixes} | {
-            "cif": {file_name.split(".")[0]: file_name for file_name in file_names if file_name.endswith(".cif")},
+    def _get_file_data(self, *, user_file_dtos: list[UserFileDto], **_) -> tuple[dict[str, str], list[str]]:
+        all_suffixes = {file_dto.file_name.split(".")[-1] for file_dto in user_file_dtos}
+        return {
+            suffix: {
+                user_file_dto.file_name: user_file_dto.file_name_hash
+                for user_file_dto in user_file_dtos
+                if user_file_dto.file_name.endswith(suffix)
+            }
+            for suffix in all_suffixes
         }
-        all_suffixes.discard("cif")
-        return [response_files[suffix].removesuffix(f".{suffix}") + f".sdf.{suffix}" for suffix in all_suffixes] + list(
-            response_files["cif"].values()
-        )
 
     @staticmethod
     def calculate_suitable_methods(calculation: str) -> tuple[list[str], dict[str, list[str]]]:

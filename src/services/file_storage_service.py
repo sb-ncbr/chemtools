@@ -1,5 +1,6 @@
 import abc
 import asyncio
+from datetime import datetime
 import hashlib
 import io
 import logging
@@ -10,7 +11,7 @@ import zipfile
 
 import aiofiles
 
-from api.schemas.user_file import DownloadRequestDto, UploadRequestDto
+from api.schemas.user_file import DownloadRequestDto, UploadRequestDto, UserFileDto
 from services.file_cache_service import FileCacheService
 from utils import unzip_files
 
@@ -36,31 +37,36 @@ class FileStorageService(abc.ABC):
             async with aiofiles.open(os.path.join(to_local_dir, file_name), "wb") as file:
                 await file.write(file_bytes)
 
-    async def upload_files(self, file_names: list[str], from_local_dir: str) -> AsyncGenerator[str, None]:
+    async def upload_files(self, file_names: list[str], from_local_dir: str) -> AsyncGenerator[UserFileDto, None]:
         logger.debug(f"Uploading files={file_names} from {from_local_dir}")
         for file_name in file_names:
             async with aiofiles.open(os.path.join(from_local_dir, file_name), "rb") as file:
                 file_bytes = await file.read()
             yield await self.__process_file(file_name, file_bytes)
 
-    async def download_files_from_request(self, data: DownloadRequestDto) -> list[str]:
+    async def download_files_from_request(self, data: DownloadRequestDto):
         logger.debug(f"Downloading files={data.file_names}")
 
-        zip_io = io.BytesIO()
-        with zipfile.ZipFile(zip_io, mode="w", compression=zipfile.ZIP_DEFLATED) as zipf:
-            for file_name in data.file_names:
-                file_bytes = await self.fetch_file(file_name)
-                zipf.writestr(file_name, file_bytes)
-            for file_path in file_paths:
-                filename = os.path.basename(file_path)
-                zipf.write(file_path, arcname=filename)
+        file_dtos = await self.file_cache_service.get_files_by(data.user_id, data.file_names)
+        if len(file_dtos) != len(data.file_names):
+            raise FileNotFoundError(
+                f"Files not found: {set(data.file_names) - {file_dto.file_name for file_dto in file_dtos}}"
+            )
 
-        zip_io.seek(0)
-        return StreamingResponse(
-            zip_io,
-            media_type="application/zip",
-            headers={"Content-Disposition": "attachment; filename=downloaded_files.zip"},
-        )
+        file_buffer = io.BytesIO()
+        if len(file_dtos) == 1:
+            file_bytes = await self.fetch_file(file_dtos[0].file_name_hash)
+            file_buffer.write(file_bytes)
+        else:
+            with zipfile.ZipFile(file_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
+                for file_dto in file_dtos:
+                    file_bytes = await self.fetch_file(file_dto.file_name_hash)
+                    zip_file.writestr(file_dto.file_name, file_bytes.decode("utf-8"))
+        file_buffer.seek(0)
+
+        time_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        file_name = file_dtos[0].file_name if len(file_dtos) == 1 else f"files_bundle_{time_str}.zip"
+        return file_buffer, file_name
 
     # NOTE there might be a filename collision when unzipping files from multiple zip files or
     # when uploading additional files with the same name
@@ -69,18 +75,22 @@ class FileStorageService(abc.ABC):
             # NOTE if there is a directory in zip file, it fails
             if request_file.content_type == "application/zip":
                 for file_name, file_func_wrapper in unzip_files(request_file.file).items():
-                    yield await self.__process_file(file_name, file_func_wrapper(), data.user_id)
+                    user_file_dto = await self.__process_file(file_name, file_func_wrapper(), data.user_id)
+                    yield user_file_dto.file_name_hash
             else:
-                yield await self.__process_file(request_file.filename, await request_file.read(), data.user_id)
+                user_file_dto = await self.__process_file(
+                    request_file.filename, await request_file.read(), data.user_id
+                )
+                yield user_file_dto.file_name_hash
 
-    async def __process_file(self, file_name: str, file_content: str, user_id: uuid.UUID | None = None) -> str:
+    async def __process_file(self, file_name: str, file_content: str, user_id: uuid.UUID | None = None) -> UserFileDto:
         file_name_hash = self.get_file_hash(file_content)
         file_extension = os.path.splitext(file_name)[1]
         new_file_name = f"{file_name_hash}{file_extension}"
 
         await self.push_file(file_name=new_file_name, file_bytes=file_content)
-        await self.file_cache_service.create_user_file(user_id, file_name, new_file_name)
-        return new_file_name
+        user_file = await self.file_cache_service.create_user_file(user_id, file_name, new_file_name)
+        return UserFileDto.model_validate(user_file)
 
     @staticmethod
     def get_file_hash(file_bytes: bytes) -> str:

@@ -1,7 +1,8 @@
+import json
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from api.enums import DockerizedToolEnum
 from db.models.calculation import CalculationStatusEnum
@@ -12,15 +13,20 @@ class TaskInfoResponseDto(BaseModel):
     token: uuid.UUID
 
 
-class CalculationResultDto[ToolDataDtoT](BaseModel):
+class CalculationResultDto(BaseModel):
     id: uuid.UUID
     output_files: list[str]
-    output_data: ToolDataDtoT
+    output_data: dict
 
     started_at: datetime
     finished_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+    @field_validator("output_data", mode="before")
+    @classmethod
+    def check_output_files(cls, v: str) -> dict:
+        return json.loads(v) if v else {}
 
 
 class CalculationRequestDto[ToolDataDtoT](BaseModel):

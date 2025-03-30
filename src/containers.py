@@ -8,7 +8,7 @@ from conf import settings
 from db import repos
 from db.database import DatabaseSessionManager
 from services.calculation_service import CalculationService
-from services.data_fetcher_service import OnlineFileFetcherService
+from services.data_fetcher_service import DataFetcherService
 from services.file_cache_service import FileCacheService
 from services.message_broker_service import MessageBrokerService
 from services.minio_storage_service import MinIOService
@@ -70,9 +70,7 @@ class AppContainer(containers.DeclarativeContainer):
     online_file_fetcher_client = providers.Singleton(
         clients.OnlineFileFetcherClient, storage_service=file_storage_service, file_cache_service=file_cache_service
     )
-    online_file_fetcher_service = providers.Singleton(
-        OnlineFileFetcherService, fetcher_client=online_file_fetcher_client
-    )
+    data_fetcher_service = providers.Singleton(DataFetcherService, fetcher_client=online_file_fetcher_client)
     calculation_service = providers.Singleton(
         CalculationService,
         calculation_request_repo=calculation_request_repo,

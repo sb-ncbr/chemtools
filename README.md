@@ -22,8 +22,8 @@ which is running the calculations inside the docker containers.
 
 ### Run
 
-- Run `docker compose up` (This runs postgres, rabbitmq, minio, and the API)
-- Run `cd src && poetry run ../bin/run_worker.sh` (This runs worker from the `src/` directory)
+- Run `docker compose up` to start postgres, rabbitmq, minio, and the API
+- Run `poetry run python src/worker.py` to start the worker
 
 ## Development
 
@@ -42,17 +42,12 @@ In order to add a new tool, you need to:
 
 ## TODO
 
-- cache
 - make mole great (working) again
-- health endpoint check api, postgres, rabbitmq, and minio
 - deployment
 
 - write about command injection (_get_cmd_args)
 - gesamt - podpora -s/-d \[kinda done\]
 - gesamt - later finish output parsing for multiple files (more than 3)
-- write docstrings
-- solve issue where I can only run the worker from `src/` folder
+- write docstrings \[in progress\]
 
 - test uploading large files. Maybe it will be necessary to upload/download them by chunks
-- thesis idea -> write about invalidating fetched_file cache. Cache can be invalidated just by making a query which deletes the fetched_file records from db.
-- how do I ask for more instances on openstack?

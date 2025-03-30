@@ -5,7 +5,7 @@ from api.schemas.fetched_file import FetchOnlineFileRequestDto
 from clients import OnlineFileFetcherClient
 
 
-class OnlineFileFetcherService:
+class DataFetcherService:
     def __init__(self, fetcher_client: OnlineFileFetcherClient):
         self.fetcher_client = fetcher_client
 

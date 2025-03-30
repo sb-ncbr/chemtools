@@ -35,10 +35,15 @@ class FileCacheService:
     async def do_files_exist(self, file_names: list[str]) -> bool:
         user_files = await self.user_file_repo.get_matching_files(file_names)
         fetched_files = await self.fetched_file_repo.get_matching_files(file_names)
-        return len(user_files) + len(fetched_files) >= len(file_names)
+        return len(set(file_obj.file_name_hash for file_obj in user_files + fetched_files)) == len(file_names)
 
     async def get_file_name(self, file_name_hash: str) -> str:
         if user_file := await self.user_file_repo.get_by(file_name_hash=file_name_hash):
             return user_file.file_name
         fetched_file = await self.fetched_file_repo.get_by(file_name_hash=file_name_hash)
         return fetched_file.file_name
+
+    async def get_files_by(self, user_id: uuid.UUID, file_names: list[str]) -> list[FetchedFileModel | UserFileModel]:
+        user_files = await self.user_file_repo.get_user_matching_files(user_id, file_names)
+        fetched_files = await self.fetched_file_repo.get_matching_files(file_names)
+        return [*user_files, *fetched_files]

@@ -23,7 +23,7 @@ class OnlineFileFetcherClient:
         # Otherwise fetch the file and save to db as cache
         data_bytes = await self._download(site_url.format(**data.model_dump()))
         file_name = f"{data.molecule_id}.{data.extension}"
-        file_name_hash = self.storage_service.get_file_hash(data_bytes)
+        file_name_hash = f"{self.storage_service.get_file_hash(data_bytes)}.{data.extension}"
         await self.storage_service.push_file(file_name_hash, data_bytes)
         await self.file_cache_service.create_fetched_file(data, file_name, file_name_hash)
         return False, file_name_hash

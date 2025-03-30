@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 
 from fastapi import UploadFile
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 
 
 class UserFileDto(BaseModel):
@@ -17,7 +17,15 @@ class UserFileDto(BaseModel):
 
 
 class DownloadRequestDto(BaseModel):
+    user_id: uuid.UUID | None = None
     file_names: list[str]
+
+    @field_validator("file_names")
+    @classmethod
+    def check_file_names(cls, v: list[str]) -> list[str]:
+        if len(v) != len(set(v)):
+            raise ValueError("Cannot download the same file multiple times")
+        return v
 
 
 class UploadRequestDto(BaseModel):

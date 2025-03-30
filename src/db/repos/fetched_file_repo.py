@@ -1,3 +1,4 @@
+import uuid
 from sqlalchemy import select
 
 from db.models.fetched_file import FetchedFileModel
