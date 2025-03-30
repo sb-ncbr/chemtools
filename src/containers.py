@@ -2,6 +2,7 @@ import docker
 from dependency_injector import containers, providers
 
 import clients
+from services.healthcheck_service import HealthcheckService
 import tools
 from conf import settings
 from db import repos
@@ -44,19 +45,18 @@ class AppContainer(containers.DeclarativeContainer):
         session_manager=session_manager,
     )
 
+    health_check_service = providers.Singleton(
+        HealthcheckService,
+        postgres_settings=postgres_settings,
+        rabbitmq_settings=rabbitmq_settings,
+        minio_settings=minio_settings,
+    )
     file_cache_service = providers.Singleton(
         FileCacheService, user_file_repo=user_file_repo, fetched_file_repo=fetched_file_repo
     )
     message_broker_service = providers.Singleton(
         MessageBrokerService,
         rabbitmq_settings=rabbitmq_settings,
-    )
-    calculation_service = providers.Singleton(
-        CalculationService,
-        calculation_request_repo=calculation_request_repo,
-        calculation_result_repo=calculation_result_repo,
-        message_broker_service=message_broker_service,
-        file_cache_service=file_cache_service,
     )
     pipeline_service = providers.Singleton(
         PipelineService,
@@ -72,6 +72,15 @@ class AppContainer(containers.DeclarativeContainer):
     )
     online_file_fetcher_service = providers.Singleton(
         OnlineFileFetcherService, fetcher_client=online_file_fetcher_client
+    )
+    calculation_service = providers.Singleton(
+        CalculationService,
+        calculation_request_repo=calculation_request_repo,
+        calculation_result_repo=calculation_result_repo,
+        message_broker_service=message_broker_service,
+        file_cache_service=file_cache_service,
+        pipeline_service=pipeline_service,
+        app_settings=app_settings,
     )
 
 

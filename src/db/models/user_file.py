@@ -16,3 +16,6 @@ class UserFileModel(Base):
     user_id: Mapped[uuid.UUID | None]
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+
+    def __repr__(self) -> str:
+        return f"UserFileModel(id={self.id}, file_name={self.file_name} file_name_hash={self.file_name_hash})"

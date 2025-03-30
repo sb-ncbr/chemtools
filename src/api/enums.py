@@ -1,6 +1,11 @@
 from enum import StrEnum
 
 
+class RabbitQueueEnum(StrEnum):
+    free_queue = "free_queue"
+    pipeline_queue = "pipeline_queue"
+
+
 class DockerizedToolEnum(StrEnum):
     chargefw2 = "chargefw2"
     mole2 = "mole2"

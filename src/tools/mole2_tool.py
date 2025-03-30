@@ -26,9 +26,6 @@ class Mole2Tool(BaseDockerizedTool):
             token=token, input_path="/input_data/asdf/1tqn.cif", output_path=f"/data/{token}", data=data
         )
 
-    def _get_error(self, msg):
-        return f"Mole2 calculation failed: {msg}"
-
     @staticmethod
     def build_xml_from_data(token: str, input_path: str, output_path: str, data: MoleRequestDto) -> None:
         root = E.Tunnels(

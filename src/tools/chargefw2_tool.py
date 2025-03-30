@@ -51,25 +51,34 @@ class ChargeFW2Tool(BaseDockerizedTool):
     async def _postprocess(self, *, _output: str, input_files: str, token: uuid.UUID, mode: ChargeModeEnum, **_) -> str:
         if mode == ChargeModeEnum.info:
             parsed_data = self.parse_info_output(_output)
-            return ChargeInfoResponseDto(**parsed_data).model_dump_json()
+            return ChargeInfoResponseDto(**parsed_data).model_dump_json(), []
 
         elif mode == ChargeModeEnum.charges:
-            response_files = await self.get_charge_response_files(token, input_files[0])
-            return ChargeResponseDto(**response_files).model_dump_json()
+            files_data, output_files = await super()._postprocess(_output=_output, token=token, input_files=input_files)
+            return ChargeResponseDto().model_dump_json(), output_files
 
         elif mode == ChargeModeEnum.suitable_methods:
             methods, parameters = self.calculate_suitable_methods(_output)
-            return ChargeSuitableMethodsResponseDto(methods=methods, parameters=parameters).model_dump_json()
+            return ChargeSuitableMethodsResponseDto(methods=methods, parameters=parameters).model_dump_json(), []
 
         elif mode == ChargeModeEnum.best_parameters:
             best_params = self.parse_best_params(_output)
-            return ChargeBestParametersResponseDto(best_parameters=best_params).model_dump_json()
+            return ChargeBestParametersResponseDto(best_parameters=best_params).model_dump_json(), []
 
         else:
             raise NotImplementedError(f"Mode {mode} is not implemented for chargefw2 tool")
 
-    def _get_error(self, msg):
-        return f"ChargeFW2 calculation failed: {msg}"
+    async def _get_output_files(self, *, token: uuid.UUID, input_files: list[str], **_) -> list[str]:
+        file_names = os.listdir(ROOT_DIR / f"data/docker/chargefw2/{token}/out")
+        all_suffixes = {file_name.split(".")[-1] for file_name in file_names}
+        file_token = f"{input_files[0].split(".")[0]}"
+        response_files = {suffix: f"{file_token}.{suffix}" for suffix in all_suffixes} | {
+            "cif": {file_name.split(".")[0]: file_name for file_name in file_names if file_name.endswith(".cif")},
+        }
+        all_suffixes.discard("cif")
+        return [response_files[suffix].removesuffix(f".{suffix}") + f".sdf.{suffix}" for suffix in all_suffixes] + list(
+            response_files["cif"].values()
+        )
 
     @staticmethod
     def calculate_suitable_methods(calculation: str) -> tuple[list[str], dict[str, list[str]]]:
@@ -87,11 +96,7 @@ class ChargeFW2Tool(BaseDockerizedTool):
             for p in parameters:
                 suitable_methods[(method, p)] += 1
 
-        # TODO is this line necessary?
-        # ok, this needs to filter out methods which are not applicable to every file
-        # (only if we support multiple files simultaneously)
         suitable_methods = {k: v for k, v in suitable_methods.items() if v == 1}
-
         methods = list({method for method, *_ in suitable_methods})
 
         parameters = defaultdict(list)
@@ -120,18 +125,3 @@ class ChargeFW2Tool(BaseDockerizedTool):
     def parse_best_params(output: str) -> str | None:
         match = re.fullmatch(r"Best parameters are: (\S+)\.json\n", output)
         return match.group(1) if match else None
-
-    async def get_charge_response_files(self, token: uuid.UUID | None, input_file: str) -> dict:
-        file_names = os.listdir(ROOT_DIR / f"data/docker/chargefw2/{token}/out")
-        all_suffixes = {file_name.split(".")[-1] for file_name in file_names}
-        file_token = f"{input_file.split('.')[0]}"
-        response_files = {suffix: f"{file_token}.{suffix}" for suffix in all_suffixes} | {
-            "cif": {file_name.split(".")[0]: file_name for file_name in file_names if file_name.endswith(".cif")},
-        }
-        all_suffixes.discard("cif")
-        await self._file_storage_service.upload_files(
-            [response_files[suffix].removesuffix(f".{suffix}") + f".sdf.{suffix}" for suffix in all_suffixes]
-            + list(response_files["cif"].values()),
-            ROOT_DIR / f"data/docker/chargefw2/{token}/out",
-        )
-        return response_files

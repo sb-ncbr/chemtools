@@ -20,3 +20,6 @@ class FetchedFileModel(Base):
     extension: Mapped[MoleculeFileExtensionEnum]
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+
+    def __repr__(self) -> str:
+        return f"FetchedFileModel(id={self.id}, file_name={self.file_name} hash={self.file_name_hash} site={self.site}"

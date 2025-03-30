@@ -15,10 +15,14 @@ class PipelineModel(Base):
     __tablename__ = "pipelines"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    name: Mapped[str]
     user_id: Mapped[uuid.UUID | None]
     user_host: Mapped[str | None]
 
     requested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
-    calculation_requests: Mapped[list["CalculationRequestModel"]] = relationship(back_populates="pipeline")
+    calculation_requests: Mapped[list["CalculationRequestModel"]] = relationship(
+        back_populates="pipeline", lazy="joined"
+    )
+
+    def __repr__(self) -> str:
+        return f"PipelineModel(id={self.id})"

@@ -8,8 +8,7 @@ from api.schemas.calculation import CalculationRequestDto
 
 class PipelineDto(BaseModel):
     id: uuid.UUID
-    name: str
-    user_id: uuid.UUID
+    user_id: uuid.UUID | None
     calculation_requests: list[CalculationRequestDto]
 
     requested_at: datetime
@@ -18,5 +17,4 @@ class PipelineDto(BaseModel):
 
 
 class CreatePipelineDto(BaseModel):
-    name: str
-    user_id: uuid.UUID | None
+    user_id: uuid.UUID | None = None

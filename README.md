@@ -44,8 +44,6 @@ In order to add a new tool, you need to:
 
 - cache
 - make mole great (working) again
-- create user_file
-- save files under name which is hash of the file content
 - health endpoint check api, postgres, rabbitmq, and minio
 - deployment
 

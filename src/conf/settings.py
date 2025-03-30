@@ -1,3 +1,4 @@
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from conf.const import ROOT_DIR
@@ -11,6 +12,7 @@ class AppSettings(BaseEnvSettings):
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
     LOG_LEVEL: str = "INFO"
+    PIPELINE_ACCEPTED_HOSTS: str = "0.0.0.0"
 
 
 class WorkerSettings(BaseEnvSettings):

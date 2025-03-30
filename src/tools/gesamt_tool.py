@@ -23,9 +23,6 @@ class GesamtTool(BaseDockerizedTool):
             return json.dumps(self.__parse_output_2_files(_output))
         return json.dumps(self.__parse_output_more_files(_output))
 
-    def _get_error(self, msg):
-        return f"Gesamt calculation failed: {msg}"
-
     @staticmethod
     def __parse_output_2_files(_output: str):
         lines = _output.splitlines()

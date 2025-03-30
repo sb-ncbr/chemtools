@@ -15,9 +15,7 @@ class TaskInfoResponseDto(BaseModel):
 class CalculationResultDto[ToolDataDtoT](BaseModel):
     id: uuid.UUID
     output_files: list[str]
-
     output_data: ToolDataDtoT
-    error_message: str | None = None
 
     started_at: datetime
     finished_at: datetime
@@ -38,5 +36,14 @@ class CalculationRequestDto[ToolDataDtoT](BaseModel):
     sequence_number: int | None = None
 
     requested_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class CreateCalculationRequestDto[ToolDataDtoT](BaseModel):
+    id: uuid.UUID
+    input_data: ToolDataDtoT
+    pipeline_id: uuid.UUID | None = None
+    sequence_number: int | None = None
 
     model_config = ConfigDict(from_attributes=True)

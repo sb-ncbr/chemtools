@@ -1,12 +1,12 @@
 from typing import Annotated
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, File
+from fastapi import APIRouter, Depends, File, Query
 from fastapi_utils.cbv import cbv
 
 from api.enums import MoleculeFileExtensionEnum, MoleculeRepoSiteEnum
 from api.schemas.fetched_file import FetchOnlineFileRequestDto, FetchOnlineFileResponseDto
-from api.schemas.user_file import UploadRequestDto, UploadResponseDto
+from api.schemas.user_file import DownloadRequestDto, UploadRequestDto, UploadResponseDto
 from containers import AppContainer
 from services.data_fetcher_service import OnlineFileFetcherService
 from services.file_storage_service import FileStorageService
@@ -24,6 +24,13 @@ class IORouter:
     ):
         self.storage_service = storage_service
         self.fetcher_service = fetcher_service
+
+    # @io_router.get("/download-files")
+    # async def download_files(self, data: Annotated[DownloadRequestDto, Query()]):
+    #     if len(file_names) == 1:
+    #         pass
+    #     files = await self.storage_service.download_files(data)
+    #     return DownloadResponseDto(files=files)
 
     @io_router.post("/upload-files")
     async def upload_files(self, data: Annotated[UploadRequestDto, File()]) -> UploadResponseDto:

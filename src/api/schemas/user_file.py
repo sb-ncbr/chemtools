@@ -16,6 +16,10 @@ class UserFileDto(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class DownloadRequestDto(BaseModel):
+    file_names: list[str]
+
+
 class UploadRequestDto(BaseModel):
     user_id: uuid.UUID | None = None
     files: list[UploadFile]

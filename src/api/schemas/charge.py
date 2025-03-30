@@ -36,10 +36,10 @@ class ChargeInfoResponseDto(BaseModel):
 
 
 class ChargeResponseDto(BaseModel):
-    mol2: str = None
-    pqr: str = None
-    txt: str = None
-    cif: dict[str, str] = None
+    mol2: str | None = None
+    pqr: str | None = None
+    txt: str | None = None
+    cif: dict[str, str] | None = None
 
 
 class ChargeBestParametersResponseDto(BaseModel):

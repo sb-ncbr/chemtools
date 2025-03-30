@@ -25,7 +25,7 @@ class FileCacheService:
             FetchedFileModel(**file_data.model_dump(), file_name=file_name, file_name_hash=file_name_hash)
         )
 
-    async def create_user_file(self, user_id: uuid.UUID, file_name: str, file_name_hash: str) -> UserFileModel:
+    async def create_user_file(self, user_id: uuid.UUID | None, file_name: str, file_name_hash: str) -> UserFileModel:
         if user_file := await self.user_file_repo.get_by(user_id=user_id, file_name_hash=file_name_hash):
             return user_file
         return await self.user_file_repo.create(
@@ -35,7 +35,7 @@ class FileCacheService:
     async def do_files_exist(self, file_names: list[str]) -> bool:
         user_files = await self.user_file_repo.get_matching_files(file_names)
         fetched_files = await self.fetched_file_repo.get_matching_files(file_names)
-        return len(user_files) + len(fetched_files) == len(file_names)
+        return len(user_files) + len(fetched_files) >= len(file_names)
 
     async def get_file_name(self, file_name_hash: str) -> str:
         if user_file := await self.user_file_repo.get_by(file_name_hash=file_name_hash):

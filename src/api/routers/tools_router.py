@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi_utils.cbv import cbv
 
 from api.enums import ChargeModeEnum, DockerizedToolEnum
-from api.schemas.calculation import TaskInfoResponseDto
+from api.schemas.calculation import CreateCalculationRequestDto, TaskInfoResponseDto
 from api.schemas.charge import (
     ChargeBestParametersRequestDto,
     ChargeInfoRequestDto,
@@ -30,40 +30,48 @@ class ToolsRouter:
 
     @tools_router.get("/chargefw2")
     async def chargefw2(self) -> dict[str, list[ChargeModeEnum]]:
-        return {"available_modes": [mode for mode in ChargeModeEnum]}
+        return {"available_modes": list(ChargeModeEnum)}
 
     @tools_router.post("/chargefw2/info")
-    async def charge_info(self, request: Request, data: ChargeInfoRequestDto) -> TaskInfoResponseDto:
+    async def charge_info(
+        self, request: Request, data: CreateCalculationRequestDto[ChargeInfoRequestDto]
+    ) -> TaskInfoResponseDto:
         return await self.calculation_service.create_calculation(
-            request, {**data.model_dump(), "mode": ChargeModeEnum.info}, DockerizedToolEnum.chargefw2
+            request, DockerizedToolEnum.chargefw2, data, mode=ChargeModeEnum.info
         )
 
     @tools_router.post("/chargefw2/charges")
-    async def charge_charges(self, request: Request, data: ChargeRequestDto) -> TaskInfoResponseDto:
+    async def charge_charges(
+        self, request: Request, data: CreateCalculationRequestDto[ChargeRequestDto]
+    ) -> TaskInfoResponseDto:
         return await self.calculation_service.create_calculation(
-            request, {**data.model_dump(), "mode": ChargeModeEnum.charges}, DockerizedToolEnum.chargefw2
+            request, DockerizedToolEnum.chargefw2, data, mode=ChargeModeEnum.charges
         )
 
     @tools_router.post("/chargefw2/suitable-methods")
     async def charge_suitable_methods(
-        self, request: Request, data: ChargeSuitableMethodsRequestDto
+        self, request: Request, data: CreateCalculationRequestDto[ChargeSuitableMethodsRequestDto]
     ) -> TaskInfoResponseDto:
         return await self.calculation_service.create_calculation(
-            request, {**data.model_dump(), "mode": ChargeModeEnum.suitable_methods}, DockerizedToolEnum.chargefw2
+            request, DockerizedToolEnum.chargefw2, data, mode=ChargeModeEnum.suitable_methods
         )
 
     @tools_router.post("/chargefw2/best-parameters")
     async def charge_best_parameters(
-        self, request: Request, data: ChargeBestParametersRequestDto
+        self, request: Request, data: CreateCalculationRequestDto[ChargeBestParametersRequestDto]
     ) -> TaskInfoResponseDto:
         return await self.calculation_service.create_calculation(
-            request, {**data.model_dump(), "mode": ChargeModeEnum.best_parameters}, DockerizedToolEnum.chargefw2
+            request, DockerizedToolEnum.chargefw2, data, mode=ChargeModeEnum.best_parameters
         )
 
     @tools_router.post("/mole2")
-    async def mole_calculation(self, request: Request, data: MoleRequestDto) -> TaskInfoResponseDto:
-        return await self.calculation_service.create_calculation(request, data.model_dump(), DockerizedToolEnum.mole2)
+    async def mole_calculation(
+        self, request: Request, data: CreateCalculationRequestDto[MoleRequestDto]
+    ) -> TaskInfoResponseDto:
+        return await self.calculation_service.create_calculation(request, data, DockerizedToolEnum.mole2)
 
     @tools_router.post("/gesamt")
-    async def gesamt_calculation(self, request: Request, data: GesamtRequestDto) -> TaskInfoResponseDto:
-        return await self.calculation_service.create_calculation(request, data.model_dump(), DockerizedToolEnum.gesamt)
+    async def gesamt_calculation(
+        self, request: Request, data: CreateCalculationRequestDto[GesamtRequestDto]
+    ) -> TaskInfoResponseDto:
+        return await self.calculation_service.create_calculation(request, data, DockerizedToolEnum.gesamt)

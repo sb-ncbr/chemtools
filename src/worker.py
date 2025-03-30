@@ -4,6 +4,7 @@ import logging.config
 import aio_pika
 from dependency_injector.wiring import Provide, inject
 
+from api.enums import RabbitQueueEnum
 from conf.settings import PostgresSettings, RabbitMQSettings, WorkerSettings
 from containers import WorkerContainer
 from db.database import DatabaseSessionManager
@@ -30,10 +31,10 @@ async def init_worker(
     channel = await connection.channel()
     await channel.set_qos(prefetch_count=1)
 
-    master = JsonMaster(channel)
+    master = JsonMaster(channel, requeue=False)
     await asyncio.gather(
-        master.create_worker("free_queue", worker_service.run_calculation_async, durable=True),
-        master.create_worker("pipeline_queue", worker_service.run_calculation_async, durable=True),
+        master.create_worker(RabbitQueueEnum.free_queue, worker_service.run_calculation_async, durable=True),
+        master.create_worker(RabbitQueueEnum.pipeline_queue, worker_service.run_calculation_async, durable=True),
     )
     logger.info("Connected to RabbitMQ")
     return connection

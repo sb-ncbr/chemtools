@@ -33,6 +33,7 @@ class CalculationRequestModel(Base):
 
     calculation_result_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("calculation_results.id"))
     pipeline_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("pipelines.id"))
+    sequence_number: Mapped[int | None]
     user_id: Mapped[uuid.UUID | None]
     user_host: Mapped[str | None]
 
@@ -42,6 +43,9 @@ class CalculationRequestModel(Base):
         back_populates="calculation_requests", lazy="joined"
     )
     pipeline: Mapped[Optional["PipelineModel"]] = relationship(back_populates="calculation_requests")
+
+    def __repr__(self) -> str:
+        return f"CalculationRequestModel(id={self.id}, tool_name={self.tool_name}, status={self.status})"
 
 
 class CalculationResultModel(Base):
@@ -56,3 +60,6 @@ class CalculationResultModel(Base):
     finished_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
     calculation_requests: Mapped[list["CalculationRequestModel"]] = relationship(back_populates="calculation_result")
+
+    def __repr__(self) -> str:
+        return f"CalculationResultModel(id={self.id})"
