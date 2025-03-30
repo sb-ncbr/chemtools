@@ -51,3 +51,4 @@ In order to add a new tool, you need to:
 - write docstrings \[in progress\]
 
 - test uploading large files. Maybe it will be necessary to upload/download them by chunks
+- write about different architecture possibilities regarding the containerized apps. Each worker runs only one container vs one worker runs every container

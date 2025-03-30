@@ -47,7 +47,8 @@ class CalculationService:
 
         # Merge all input_files into a single list and remove them from the data dict.
         # If there is one input_file, it will be converted to a list of length 1.
-        input_files = [input_data_dict.pop("input_file", None)] or [*input_data_dict.pop("input_files", [])]
+        input_file = input_data_dict.pop("input_file", None)
+        input_files = [*input_data_dict.pop("input_files", []), *([input_file] if input_file else [])]
 
         if not await self.file_cache_service.do_files_exist(input_files):
             raise HTTPException(status_code=404, detail="Input files do not exist")

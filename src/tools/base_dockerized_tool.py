@@ -13,10 +13,6 @@ from services.file_storage_service import FileStorageService
 logger = logging.getLogger(__name__)
 
 
-class ContainerRuntimeError(RuntimeError):
-    pass
-
-
 class BaseDockerizedTool(abc.ABC):
     """
     Base class for dockerized tools which provides
@@ -97,7 +93,7 @@ class BaseDockerizedTool(abc.ABC):
             input_files, ROOT_DIR / f"data/docker/{self.image_name}/{token}/in"
         )
 
-    async def _postprocess(self, *, _output: str, token: uuid.UUID, **kwargs) -> tuple[str, list[str]]:
+    async def _postprocess(self, *, _output: str, **_) -> tuple[dict, list[str]]:
         """
         Postprocess the output of the dockerized tool.
         By default, it uploads the output files to the file storage.
@@ -110,7 +106,7 @@ class BaseDockerizedTool(abc.ABC):
             str: The processed output string.
 
         """
-        return _output, []
+        return {"result": _output}, []
 
     async def _send_files(self, *, token: uuid.UUID, file_names: str) -> list[UserFileDto]:
         return [
@@ -168,7 +164,7 @@ class BaseDockerizedTool(abc.ABC):
             )
         except docker.errors.ContainerError as e:
             logger.error(f"Docker run failed on error: {e}")
-            raise ContainerRuntimeError(self._get_error(e.stderr.decode("utf-8")))
+            raise RuntimeError(self._get_error(e.stderr.decode("utf-8")))
 
         try:
             logger.debug("Docker run finished. Invoking postprocess")

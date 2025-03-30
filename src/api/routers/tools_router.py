@@ -68,10 +68,10 @@ class ToolsRouter:
     async def mole_calculation(
         self, request: Request, data: CreateCalculationRequestDto[MoleRequestDto]
     ) -> TaskInfoResponseDto:
-        return await self.calculation_service.create_calculation(request, data, DockerizedToolEnum.mole2)
+        return await self.calculation_service.create_calculation(request, DockerizedToolEnum.mole2, data)
 
     @tools_router.post("/gesamt")
     async def gesamt_calculation(
         self, request: Request, data: CreateCalculationRequestDto[GesamtRequestDto]
     ) -> TaskInfoResponseDto:
-        return await self.calculation_service.create_calculation(request, data, DockerizedToolEnum.gesamt)
+        return await self.calculation_service.create_calculation(request, DockerizedToolEnum.gesamt, data)

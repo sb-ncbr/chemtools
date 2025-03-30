@@ -68,7 +68,7 @@ class WorkerService:
             logger.error(
                 f"Tool '{dockerized_tool.image_name}' run by user={calculation_dto.user_id} failed with error: {e}"
             )
-            return CalculationStatusEnum.failure, str(e), []
+            return CalculationStatusEnum.failure, {"error": str(e)}, []
 
     async def _save_calculation_result(
         self,

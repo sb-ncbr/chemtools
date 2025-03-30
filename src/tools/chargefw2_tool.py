@@ -49,25 +49,27 @@ class ChargeFW2Tool(BaseDockerizedTool):
             os.makedirs(ROOT_DIR / f"data/docker/chargefw2/{token}/out", exist_ok=True)
         await super()._preprocess(token=token, input_files=input_files)
 
-    async def _postprocess(self, *, _output: str, token: uuid.UUID, mode: ChargeModeEnum, **_) -> str:
+    async def _postprocess(
+        self, *, _output: str, token: uuid.UUID, mode: ChargeModeEnum, **_
+    ) -> tuple[dict, list[str]]:
         if mode == ChargeModeEnum.info:
             parsed_data = self.parse_info_output(_output)
-            return ChargeInfoResponseDto(**parsed_data).model_dump_json(), []
+            return ChargeInfoResponseDto(**parsed_data).model_dump(), []
 
         elif mode == ChargeModeEnum.charges:
             file_names = os.listdir(ROOT_DIR / f"data/docker/chargefw2/{token}/out")
             user_file_dtos = await self._send_files(token=token, file_names=file_names)
             files_data = self._get_file_data(user_file_dtos=user_file_dtos)
             file_hashes = [file_obj.file_name_hash for file_obj in user_file_dtos]
-            return ChargeResponseDto(**files_data).model_dump_json(), file_hashes
+            return ChargeResponseDto(**files_data).model_dump(), file_hashes
 
         elif mode == ChargeModeEnum.suitable_methods:
             methods, parameters = self.calculate_suitable_methods(_output)
-            return ChargeSuitableMethodsResponseDto(methods=methods, parameters=parameters).model_dump_json(), []
+            return ChargeSuitableMethodsResponseDto(methods=methods, parameters=parameters).model_dump(), []
 
         elif mode == ChargeModeEnum.best_parameters:
             best_params = self.parse_best_params(_output)
-            return ChargeBestParametersResponseDto(best_parameters=best_params).model_dump_json(), []
+            return ChargeBestParametersResponseDto(best_parameters=best_params).model_dump(), []
 
         else:
             raise NotImplementedError(f"Mode {mode} is not implemented for chargefw2 tool")
