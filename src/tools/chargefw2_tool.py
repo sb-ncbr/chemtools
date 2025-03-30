@@ -46,7 +46,7 @@ class ChargeFW2Tool(BaseDockerizedTool):
 
     async def _preprocess(self, token: uuid.UUID, input_files: list[str], mode: ChargeModeEnum, **_) -> None:
         if mode == ChargeModeEnum.charges:
-            os.makedirs(ROOT_DIR / f"data/docker/chargefw2/{token}/out", exist_ok=True)
+            os.makedirs(ROOT_DIR / f"data/docker/{self.image_name}/{token}/out", exist_ok=True)
         await super()._preprocess(token=token, input_files=input_files)
 
     async def _postprocess(
@@ -57,9 +57,9 @@ class ChargeFW2Tool(BaseDockerizedTool):
             return ChargeInfoResponseDto(**parsed_data).model_dump(), []
 
         elif mode == ChargeModeEnum.charges:
-            file_names = os.listdir(ROOT_DIR / f"data/docker/chargefw2/{token}/out")
+            file_names = os.listdir(ROOT_DIR / f"data/docker/{self.image_name}/{token}/out")
             user_file_dtos = await self._send_files(token=token, file_names=file_names)
-            files_data = self._get_file_data(user_file_dtos=user_file_dtos)
+            files_data = self.get_file_data(user_file_dtos)
             file_hashes = [file_obj.file_name_hash for file_obj in user_file_dtos]
             return ChargeResponseDto(**files_data).model_dump(), file_hashes
 
@@ -74,7 +74,8 @@ class ChargeFW2Tool(BaseDockerizedTool):
         else:
             raise NotImplementedError(f"Mode {mode} is not implemented for chargefw2 tool")
 
-    def _get_file_data(self, *, user_file_dtos: list[UserFileDto], **_) -> tuple[dict[str, str], list[str]]:
+    @staticmethod
+    def get_file_data(user_file_dtos: list[UserFileDto]) -> tuple[dict[str, str], list[str]]:
         all_suffixes = {file_dto.file_name.split(".")[-1] for file_dto in user_file_dtos}
         return {
             suffix: {

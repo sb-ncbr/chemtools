@@ -65,7 +65,7 @@ class WorkerService:
             )
             return CalculationStatusEnum.success, result, output_files
         except Exception as e:
-            logger.error(
+            logger.exception(
                 f"Tool '{dockerized_tool.image_name}' run by user={calculation_dto.user_id} failed with error: {e}"
             )
             return CalculationStatusEnum.failure, {"error": str(e)}, []

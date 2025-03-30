@@ -1,5 +1,3 @@
-import uuid
-
 from pydantic import BaseModel
 
 from api.enums import MolePyMolChargePaletteEnum, MolePyMolSurfaceTypeEnum, MoleTunnelWeightFunctionEnum
@@ -67,19 +65,16 @@ class MoleExit(BaseModel):
     points: list[MoleExitPoint]
 
 
-class MoleRequestDto(BaseModel):
+class MoleDto(BaseModel):
     cavity: MoleCavityParams = MoleCavityParams()
     tunnel: MoleTunnelParams = MoleTunnelParams()
     export_options: MoleExportOptions = MoleExportOptions()
     custom_exits: list[MoleExit] | None = None
     custom_filter: str | None = None
 
-    # TODO maybe support origins and paths
+
+class MoleRequestDto(MoleDto):
+    input_file: str
 
 
-class TunnelsDto(BaseModel):
-    input
-
-
-class MoleResponseDto(BaseModel):
-    token: uuid.UUID
+# TODO support origins, paths and possibly other params

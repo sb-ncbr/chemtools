@@ -1,6 +1,6 @@
 import logging
 import tomllib
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING, Any, Callable
 from zipfile import ZipFile
 
 import yaml
@@ -21,6 +21,12 @@ def get_project_version():
     pyproject_path = ROOT_DIR / "pyproject.toml"
     with open(pyproject_path, "rb") as file:
         return tomllib.load(file)["tool"]["poetry"]["version"]
+
+
+def to_str(value: Any) -> str:
+    if isinstance(value, bool):
+        return "1" if value else "0"
+    return str(value)
 
 
 def unzip_files(file: File) -> dict[str, Callable[[str], bytes]]:

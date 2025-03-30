@@ -43,7 +43,6 @@ In order to add a new tool, you need to:
 
 ## TODO
 
-- make mole great (working) again
 - deployment
 
 - write about command injection (_get_cmd_args)
