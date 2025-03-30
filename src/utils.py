@@ -1,7 +1,6 @@
-from typing import TYPE_CHECKING
 import logging
 import tomllib
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 from zipfile import ZipFile
 
 import yaml
@@ -59,7 +58,7 @@ def init_worker_di() -> None:
     )
 
 
-def init_logging(settings: 'BaseEnvSettings') -> None:
+def init_logging(settings: "BaseEnvSettings") -> None:
     logging.basicConfig(level=settings.LOG_LEVEL)
     config = load_yml(ROOT_DIR / "src/conf/logger.yml")
     for logger in ["aio_pika", "urllib3", "docker", "aiormq"]:

@@ -1,8 +1,7 @@
-from sqlalchemy import select
-from sqlalchemy import cast
+from sqlalchemy import cast, select
 from sqlalchemy.dialects.postgresql import JSONB
 
-from db.models.calculation import CalculationResultModel, CalculationRequestModel, CalculationStatusEnum
+from db.models.calculation import CalculationRequestModel, CalculationResultModel, CalculationStatusEnum
 from db.repos.base_repo import BaseRepo
 
 

@@ -37,11 +37,11 @@ class CalculationService:
         client_host = request.client.host
         if data.pipeline_id:
             if client_host not in self.app_settings.PIPELINE_ACCEPTED_HOSTS.split(","):
-                raise HTTPException(status_code=403, detail=f"Unauthorized to run pipeline calculations")
+                raise HTTPException(status_code=403, detail="Unauthorized to run pipeline calculations")
             if await self.pipeline_service.get_pipeline(data.pipeline_id) is None:
                 raise HTTPException(status_code=404, detail=f"Pipeline with id {data.pipeline_id} not found")
             if not data.sequence_number:
-                raise HTTPException(status_code=422, detail=f"Sequence number is required for pipeline calculations")
+                raise HTTPException(status_code=422, detail="Sequence number is required for pipeline calculations")
 
         input_data_dict = {**data.input_data.model_dump(), **additional_data}
 

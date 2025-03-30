@@ -1,9 +1,9 @@
 import asyncio
+
+from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi_utils.cbv import cbv
-
-from dependency_injector.wiring import inject, Provide
 
 from containers import AppContainer
 from services.healthcheck_service import HealthcheckService

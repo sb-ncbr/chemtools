@@ -2,7 +2,6 @@ import docker
 from dependency_injector import containers, providers
 
 import clients
-from services.healthcheck_service import HealthcheckService
 import tools
 from conf import settings
 from db import repos
@@ -10,6 +9,7 @@ from db.database import DatabaseSessionManager
 from services.calculation_service import CalculationService
 from services.data_fetcher_service import DataFetcherService
 from services.file_cache_service import FileCacheService
+from services.healthcheck_service import HealthcheckService
 from services.message_broker_service import MessageBrokerService
 from services.minio_storage_service import MinIOService
 from services.pipeline_service import PipelineService

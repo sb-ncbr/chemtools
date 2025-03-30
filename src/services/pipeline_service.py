@@ -2,7 +2,6 @@ import uuid
 
 from fastapi import Request
 
-from api.schemas.calculation import CalculationRequestDto
 from api.schemas.pipeline import CreatePipelineDto, PipelineDto
 from db.models.pipeline import PipelineModel
 from db.repos.pipeline_repo import PipelineRepo

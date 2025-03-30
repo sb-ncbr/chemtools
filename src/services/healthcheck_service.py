@@ -2,6 +2,7 @@ from aio_pika import connect_robust
 from minio import Minio
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
+
 from conf.settings import MinIOSettings, PostgresSettings, RabbitMQSettings
 
 
