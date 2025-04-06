@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 
 from api.enums import MolePyMolChargePaletteEnum, MolePyMolSurfaceTypeEnum, MoleTunnelWeightFunctionEnum
+from api.schemas.base_tool import SingleFileRequestDto
 
 
 class MoleCavityParams(BaseModel):
@@ -73,8 +74,8 @@ class MoleDto(BaseModel):
     custom_filter: str | None = None
 
 
-class MoleRequestDto(MoleDto):
-    input_file: str
+class MoleRequestDto(MoleDto, SingleFileRequestDto):
+    pass
 
 
 # TODO support origins, paths and possibly other params

@@ -121,10 +121,6 @@ class Mole2Tool(BaseDockerizedTool):
                 if data.custom_exits
                 else []
             ),
-            E.Origins(
-                E.Origin(E.Residue(Chain="A", SequenceNumber="308"), E.Residue(Chain="A", SequenceNumber="309")),
-                Auto="0",
-            ),
         )
         doc = etree.ElementTree(root)
         doc.write(

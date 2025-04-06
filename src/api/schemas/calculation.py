@@ -41,8 +41,9 @@ class CalculationRequestDto[ToolDataDtoT](BaseModel):
 
 
 class CreateCalculationRequestDto[ToolDataDtoT](BaseModel):
-    input_data: ToolDataDtoT
     pipeline_id: uuid.UUID | None = None
     sequence_number: int | None = None
+    user_id: uuid.UUID | None = None
+    input_data: ToolDataDtoT
 
     model_config = ConfigDict(from_attributes=True)

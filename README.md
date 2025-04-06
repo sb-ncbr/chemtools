@@ -39,9 +39,16 @@ In order to add a new tool, you need to:
 ### Database
 
 - When you make changes in database models, you need to create new alembic migration. Run `poetry run alembic revision --autogenerate -m <rev_name>`
+- To update changes use `poetry run alembic upgrade head`
 
 
 ## TODO
+
+- add list user files endpoint
+- add field `force_download` to fetched_file
+- save duration for calculation_result.
+- SingleFileRequestDto / ManyFilesRequestDto don't forget about this
+- setup worker queue names from .env. Remember that each worker should run only 1 queue (possibly more)
 
 - deployment
 
@@ -52,3 +59,4 @@ In order to add a new tool, you need to:
 
 - test uploading large files. Maybe it will be necessary to upload/download them by chunks
 - write about different architecture possibilities regarding the containerized apps. Each worker runs only one container vs one worker runs every container
+- caching -> fetched files -> think of sending head requests to check whether the file on the server has changed. This could be supported only by certain sites. Write about this possible improvement in thesis.

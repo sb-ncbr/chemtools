@@ -62,6 +62,7 @@ class CalculationService:
                 sequence_number=data.sequence_number,
                 input_files=input_files,
                 input_data=input_data_dict,
+                # TODO add user id
             )
         )
         calculation_dto = CalculationRequestDto.model_validate(calculation)

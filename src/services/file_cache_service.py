@@ -47,3 +47,6 @@ class FileCacheService:
         user_files = await self.user_file_repo.get_user_matching_files(user_id, file_names)
         fetched_files = await self.fetched_file_repo.get_matching_files(file_names)
         return [*user_files, *fetched_files]
+
+    async def get_user_files(self, user_id: uuid.UUID) -> list[UserFileModel]:
+        return await self.user_file_repo.filter_by(user_id=user_id)

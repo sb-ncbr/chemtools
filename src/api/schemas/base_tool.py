@@ -1,10 +1,6 @@
 from pydantic import BaseModel
 
 
-class _BaseToolRequestDto(BaseModel):
-    pass
-
-
 class SingleFileRequestDto(BaseModel):
     input_file: str
 

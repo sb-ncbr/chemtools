@@ -42,6 +42,7 @@ def init_app_di() -> None:
     container = AppContainer()
     container.wire(
         modules=[
+            "__main__",
             "app",
             "api.routers.io_router",
             "api.routers.system_router",

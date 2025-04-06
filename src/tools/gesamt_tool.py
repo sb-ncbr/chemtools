@@ -19,11 +19,11 @@ class GesamtTool(BaseDockerizedTool):
 
     async def _postprocess(self, *, input_files: list[str], _output: str, **_) -> tuple[dict, list[str]]:
         if len(input_files) == 2:
-            return self.parse_output_2_files(_output), []
-        return self.parse_output_more_files(_output), []
+            return self.parse_output_two_files(_output), []
+        return self.parse_output_more_than_three_files(_output), []
 
     @staticmethod
-    def parse_output_2_files(_output: str) -> dict:
+    def parse_output_two_files(_output: str) -> dict:
         lines = _output.splitlines()
         matrix_start_idx = lines.index(" Transformation matrix for MOVING structure:") + 3
         matrix = list(zip(*[line.split() for line in lines[matrix_start_idx : matrix_start_idx + 3]]))
@@ -38,5 +38,6 @@ class GesamtTool(BaseDockerizedTool):
         }
 
     @staticmethod
-    def parse_output_more_files(_output: str) -> dict:
+    def parse_output_more_than_three_files(_output: str) -> dict:
+        # TODO please finish this someone more competent
         return {}
