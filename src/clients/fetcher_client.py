@@ -17,11 +17,13 @@ class OnlineFileFetcherClient:
 
     async def fetch_from(self, site_url: str, data: FetchOnlineFileRequestDto) -> tuple[bool, str]:
         # Try obtaining the file hash from db (if the file was fetched before)
-        if fetched_file := await self.file_cache_service.get_fetched_file(data):
+        fetched_file = await self.file_cache_service.get_fetched_file(data)
+        data_dict = data.model_dump()
+        if not data_dict.pop("force_download") and fetched_file:
             return True, fetched_file.file_name_hash
 
         # Otherwise fetch the file and save to db as cache
-        data_bytes = await self._download(site_url.format(**data.model_dump()))
+        data_bytes = await self._download(site_url.format(**data_dict))
         file_name = f"{data.molecule_id}.{data.extension}"
         file_name_hash = f"{self.storage_service.get_file_hash(data_bytes)}.{data.extension}"
         await self.storage_service.push_file(file_name_hash, data_bytes)

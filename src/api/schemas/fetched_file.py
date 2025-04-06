@@ -23,6 +23,7 @@ class FetchOnlineFileRequestDto(BaseModel):
     molecule_id: str
     site: MoleculeRepoSiteEnum
     extension: MoleculeFileExtensionEnum
+    force_download: bool = False
 
     @field_validator("molecule_id")
     def check_molecule_id(cls, v):
