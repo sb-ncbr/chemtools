@@ -55,9 +55,7 @@ class CalculationResultModel(Base):
 
     output_files: Mapped[list[str]] = mapped_column(JSONB)
     output_data: Mapped[dict[str, Any]] = mapped_column(JSONB)
-
-    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    finished_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    duration: Mapped[float] = mapped_column(default=0.0)
 
     calculation_requests: Mapped[list["CalculationRequestModel"]] = relationship(back_populates="calculation_result")
 

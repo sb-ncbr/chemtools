@@ -16,9 +16,7 @@ class CalculationResultDto(BaseModel):
     id: uuid.UUID
     output_files: list[str]
     output_data: dict
-
-    started_at: datetime
-    finished_at: datetime
+    duration: float
 
     model_config = ConfigDict(from_attributes=True)
 

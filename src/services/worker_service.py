@@ -82,8 +82,7 @@ class WorkerService:
             CalculationResultModel(
                 output_files=output_files,
                 output_data=output_data,
-                started_at=time_started,
-                finished_at=datetime.now(UTC),
+                duration=(datetime.now(UTC) - time_started).total_seconds(),
             )
         )
         await self.calculation_request_repo.update(calculation, calculation_result=calculation_result, status=status)
