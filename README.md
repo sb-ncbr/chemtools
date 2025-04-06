@@ -44,9 +44,6 @@ In order to add a new tool, you need to:
 
 ## TODO
 
-- SingleFileRequestDto / ManyFilesRequestDto don't forget about this
-- setup worker queue names from .env. Remember that each worker should run only 1 queue (possibly more)
-
 - deployment
 
 - write about command injection (_get_cmd_args)

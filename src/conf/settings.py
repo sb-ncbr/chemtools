@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from api.enums import RabbitQueueEnum
 from conf.const import ROOT_DIR
 
 
@@ -16,6 +17,7 @@ class AppSettings(BaseEnvSettings):
 
 class WorkerSettings(BaseEnvSettings):
     LOG_LEVEL: str = "INFO"
+    QUEUE_NAME: str = RabbitQueueEnum.free_queue
 
 
 class PostgresSettings(BaseEnvSettings):
