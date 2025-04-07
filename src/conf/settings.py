@@ -25,7 +25,7 @@ class PostgresSettings(BaseEnvSettings):
     POSTGRES_PASSWORD: str = "postgres"
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
-    POSTGRES_DB: str = "chemtools-db"
+    POSTGRES_DB: str = "chemtools_db"
 
     @property
     def postgres_url(self):
