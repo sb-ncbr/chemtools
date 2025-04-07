@@ -2,10 +2,10 @@ import os
 import re
 
 from conf.const import ROOT_DIR
-from tools import BaseDockerizedTool
+from tools.dockerized_tool_base import DockerizedToolBase
 
 
-class GesamtTool(BaseDockerizedTool):
+class GesamtTool(DockerizedToolBase):
     image_name = "gesamt"
     docker_run_kwargs = {"volumes": {os.path.abspath(ROOT_DIR / "data/docker/gesamt"): {"bind": "/data", "mode": "r"}}}
 

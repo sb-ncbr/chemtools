@@ -3,7 +3,6 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
-from api.enums import DockerizedToolEnum
 from db.models.calculation import CalculationStatusEnum
 
 
@@ -23,7 +22,7 @@ class CalculationResultDto(BaseModel):
 
 class CalculationRequestDto[ToolDataDtoT](BaseModel):
     id: uuid.UUID
-    tool_name: DockerizedToolEnum
+    tool_name: str
     status: CalculationStatusEnum
 
     input_files: list[str] | None = None

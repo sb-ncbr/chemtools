@@ -1,8 +1,9 @@
+import inspect
+
 import docker
 from dependency_injector import containers, providers
 
 import clients
-import tools
 from conf import settings
 from db import repos
 from db.database import DatabaseSessionManager
@@ -14,6 +15,7 @@ from services.message_broker_service import MessageBrokerService
 from services.minio_storage_service import MinIOService
 from services.pipeline_service import PipelineService
 from services.worker_service import WorkerService
+from utils import get_tool_modules
 
 
 class AppContainer(containers.DeclarativeContainer):
@@ -117,15 +119,21 @@ class WorkerContainer(containers.DeclarativeContainer):
         file_cache_service=file_cache_service,
     )
 
-    chargefw2_tool = providers.Singleton(tools.ChargeFW2Tool, file_storage_service=file_storage_service, docker=docker)
-    mole2_tool = providers.Singleton(tools.Mole2Tool, file_storage_service=file_storage_service, docker=docker)
-    gesamt_tool = providers.Singleton(tools.GesamtTool, file_storage_service=file_storage_service, docker=docker)
 
-    worker_service = providers.Singleton(
-        WorkerService,
-        chargefw2_tool=chargefw2_tool,
-        mole2_tool=mole2_tool,
-        gesamt_tool=gesamt_tool,
-        calculation_request_repo=calculation_request_repo,
-        calculation_result_repo=calculation_result_repo,
-    )
+for tool_name, tool_module in get_tool_modules("tool"):
+    for class_name, cls in inspect.getmembers(tool_module, inspect.isclass):
+        if class_name.endswith("Tool"):
+            setattr(
+                WorkerContainer,
+                f"{tool_name}_tool",
+                providers.Singleton(
+                    cls, file_storage_service=WorkerContainer.file_storage_service, docker=WorkerContainer.docker
+                ),
+            )
+
+WorkerContainer.worker_service = providers.Singleton(
+    WorkerService,
+    **{f"{tool_name}_tool": getattr(WorkerContainer, f"{tool_name}_tool") for tool_name, _ in get_tool_modules("tool")},
+    calculation_request_repo=WorkerContainer.calculation_request_repo,
+    calculation_result_repo=WorkerContainer.calculation_result_repo,
+)

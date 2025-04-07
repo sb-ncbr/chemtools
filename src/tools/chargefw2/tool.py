@@ -3,19 +3,19 @@ import re
 import uuid
 from collections import Counter, defaultdict
 
-from api.enums import ChargeModeEnum
-from api.schemas.charge import (
+from api.schemas.user_file import UserFileDto
+from conf.const import ROOT_DIR
+from tools.chargefw2.schema import (
     ChargeBestParametersResponseDto,
     ChargeInfoResponseDto,
+    ChargeModeEnum,
     ChargeResponseDto,
     ChargeSuitableMethodsResponseDto,
 )
-from api.schemas.user_file import UserFileDto
-from conf.const import ROOT_DIR
-from tools import BaseDockerizedTool
+from tools.dockerized_tool_base import DockerizedToolBase
 
 
-class ChargeFW2Tool(BaseDockerizedTool):
+class ChargeFW2Tool(DockerizedToolBase):
     image_name = "chargefw2"
     docker_run_kwargs = {"volumes": {ROOT_DIR / "data/docker/chargefw2": {"bind": "/data", "mode": "rw"}}}
 

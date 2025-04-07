@@ -1,11 +1,14 @@
+import importlib
 import logging
+import pkgutil
 import tomllib
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any, Callable, Generator
 from zipfile import ZipFile
 
 import yaml
 from fastapi import File
 
+import tools
 from conf.const import ROOT_DIR
 
 if TYPE_CHECKING:
@@ -34,6 +37,14 @@ def unzip_files(file: File) -> dict[str, Callable[[str], bytes]]:
     # .read() surrounded in lambda to avoid storing all file contents in memory.
     # Also name=name is needed to avoid late binding.
     return {name: lambda name=name: zip_file.read(name) for name in zip_file.namelist()}
+
+
+def get_tool_modules(module_type: str) -> Generator[tuple[str, Callable], None, None]:
+    for _, module_name, _ in pkgutil.iter_modules(tools.__path__):
+        try:
+            yield module_name, importlib.import_module(f"tools.{module_name}.{module_type}")
+        except ModuleNotFoundError:
+            continue
 
 
 def init_app_di() -> None:

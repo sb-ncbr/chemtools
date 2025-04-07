@@ -13,7 +13,7 @@ from services.file_storage_service import FileStorageService
 logger = logging.getLogger(__name__)
 
 
-class BaseDockerizedTool(abc.ABC):
+class DockerizedToolBase(abc.ABC):
     """
     Base class for dockerized tools which provides
     a framework for running tools in Docker containers.

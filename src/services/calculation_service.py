@@ -3,7 +3,7 @@ import uuid
 
 from fastapi import HTTPException, Request
 
-from api.enums import DockerizedToolEnum, RabbitQueueEnum
+from api.enums import RabbitQueueEnum
 from api.schemas.calculation import CalculationRequestDto, CreateCalculationRequestDto, TaskInfoResponseDto
 from conf.settings import AppSettings
 from db.models.calculation import CalculationRequestModel, CalculationStatusEnum
@@ -32,7 +32,7 @@ class CalculationService:
         self.app_settings = app_settings
 
     async def create_calculation(
-        self, request: Request, tool_name: DockerizedToolEnum, data: CreateCalculationRequestDto, **additional_data
+        self, request: Request, tool_name: str, data: CreateCalculationRequestDto, **additional_data
     ) -> TaskInfoResponseDto:
         client_host = request.client.host
         if data.pipeline_id:

@@ -31,7 +31,7 @@ async def init_worker(
     await channel.set_qos(prefetch_count=1)
 
     master = JsonMaster(channel, requeue=False)
-    await master.create_worker(worker_settings.QUEUE_NAME, worker_service.run_calculation_async, durable=True),
+    (await master.create_worker(worker_settings.QUEUE_NAME, worker_service.run_calculation_async, durable=True),)
 
     logger.info("Connected to RabbitMQ")
     return connection

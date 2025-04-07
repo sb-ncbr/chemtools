@@ -1,7 +1,25 @@
+from enum import StrEnum
+
 from pydantic import BaseModel
 
-from api.enums import MolePyMolChargePaletteEnum, MolePyMolSurfaceTypeEnum, MoleTunnelWeightFunctionEnum
 from api.schemas.base_tool import SingleFileRequestDto
+
+
+class MoleTunnelWeightFunctionEnum(StrEnum):
+    voronoi_scale = "VoronoiScale"
+    length_and_radius = "LengthAndRadius"
+    length = "Length"
+    constant = "Constant"
+
+
+class MolePyMolSurfaceTypeEnum(StrEnum):
+    surface = "Surface"
+    spheres = "Spheres"
+
+
+class MolePyMolChargePaletteEnum(StrEnum):
+    red_white_blue = "RedWhiteBlue"
+    blue_white_red = "BlueWhiteRed"
 
 
 class MoleCavityParams(BaseModel):

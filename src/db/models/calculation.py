@@ -1,32 +1,23 @@
 import uuid
 from datetime import UTC, datetime
-from enum import StrEnum
 from typing import TYPE_CHECKING, Any, Optional
 
 from sqlalchemy import DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from api.enums import DockerizedToolEnum
+from api.enums import CalculationStatusEnum
 from db.database import Base
 
 if TYPE_CHECKING:
     from db.models import PipelineModel
 
 
-class CalculationStatusEnum(StrEnum):
-    pending = "pending"
-    running = "running"
-    success = "success"
-    cached = "cached"
-    failure = "failure"
-
-
 class CalculationRequestModel(Base):
     __tablename__ = "calculation_requests"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
-    tool_name: Mapped[DockerizedToolEnum]
+    tool_name: Mapped[str]
     status: Mapped[CalculationStatusEnum] = mapped_column(default=CalculationStatusEnum.pending)
     input_files: Mapped[list[str]] = mapped_column(JSONB)
     input_data: Mapped[dict[str, Any]] = mapped_column(JSONB)

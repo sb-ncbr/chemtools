@@ -1,22 +1,17 @@
 from enum import StrEnum
 
 
+class CalculationStatusEnum(StrEnum):
+    pending = "pending"
+    running = "running"
+    success = "success"
+    cached = "cached"
+    failure = "failure"
+
+
 class RabbitQueueEnum(StrEnum):
     free_queue = "free_queue"
     pipeline_queue = "pipeline_queue"
-
-
-class DockerizedToolEnum(StrEnum):
-    chargefw2 = "chargefw2"
-    mole2 = "mole2"
-    gesamt = "gesamt"
-
-
-class ChargeModeEnum(StrEnum):
-    info = "info"
-    charges = "charges"
-    best_parameters = "best-parameters"
-    suitable_methods = "suitable-methods"
 
 
 class MoleculeFileExtensionEnum(StrEnum):
@@ -43,20 +38,3 @@ class MoleculeRepoSiteEnum(StrEnum):
             self.rcsb_pdb: [MoleculeFileExtensionEnum.pdb, MoleculeFileExtensionEnum.cif],
             self.pubchem: [MoleculeFileExtensionEnum.sdf],
         }.get(self, [])
-
-
-class MoleTunnelWeightFunctionEnum(StrEnum):
-    voronoi_scale = "VoronoiScale"
-    length_and_radius = "LengthAndRadius"
-    length = "Length"
-    constant = "Constant"
-
-
-class MolePyMolSurfaceTypeEnum(StrEnum):
-    surface = "Surface"
-    spheres = "Spheres"
-
-
-class MolePyMolChargePaletteEnum(StrEnum):
-    red_white_blue = "RedWhiteBlue"
-    blue_white_red = "BlueWhiteRed"

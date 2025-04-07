@@ -5,13 +5,13 @@ import uuid
 from lxml import etree
 from lxml.builder import E
 
-from api.schemas.mole import MoleDto
 from conf.const import ROOT_DIR
-from tools import BaseDockerizedTool
+from tools.dockerized_tool_base import DockerizedToolBase
+from tools.mole2.schema import MoleDto
 from utils import to_str
 
 
-class Mole2Tool(BaseDockerizedTool):
+class Mole2Tool(DockerizedToolBase):
     image_name = "mole2"
     docker_run_kwargs = {
         "volumes": {

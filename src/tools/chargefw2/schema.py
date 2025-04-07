@@ -1,6 +1,15 @@
+from enum import StrEnum
+
 from pydantic import BaseModel
 
 from api.schemas.base_tool import SingleFileRequestDto
+
+
+class ChargeModeEnum(StrEnum):
+    info = "info"
+    charges = "charges"
+    best_parameters = "best-parameters"
+    suitable_methods = "suitable-methods"
 
 
 class ChargeInfoRequestDto(SingleFileRequestDto):
