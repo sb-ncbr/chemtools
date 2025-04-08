@@ -21,9 +21,9 @@ class ChargeFW2Tool(DockerizedToolBase):
 
     def _get_cmd_params(
         self,
-        input_files: list[str],
+        _token: uuid.UUID,
+        _input_files: list[str],
         mode: ChargeModeEnum,
-        token: str = "",
         ignore_water: bool = False,
         read_hetatm: bool = False,
         permissive_types: bool = False,
@@ -31,8 +31,8 @@ class ChargeFW2Tool(DockerizedToolBase):
         parameter: str = "",
         **_,
     ) -> str:
-        in_path = os.path.abspath(f"/data/{token}/in/{input_files[0]}")
-        out_path = os.path.abspath(f"/data/{token}/out")
+        in_path = os.path.abspath(f"/data/{_token}/in/{_input_files[0]}")
+        out_path = os.path.abspath(f"/data/{_token}/out")
 
         base_args = f"--mode {mode} --input-file {in_path}"
         out_param = f" --chg-out-dir {out_path}" if mode == ChargeModeEnum.charges else ""
@@ -44,21 +44,21 @@ class ChargeFW2Tool(DockerizedToolBase):
         parameters = f"{f' --method {method}' if method else ''}{f' --par-file {parameter}' if parameter else ''}"
         return f"{base_args}{out_param}{flags}{parameters}"
 
-    async def _preprocess(self, token: uuid.UUID, input_files: list[str], mode: ChargeModeEnum, **_) -> None:
+    async def _preprocess(self, _token: uuid.UUID, _input_files: list[str], mode: ChargeModeEnum, **_) -> None:
         if mode == ChargeModeEnum.charges:
-            os.makedirs(ROOT_DIR / f"data/docker/{self.image_name}/{token}/out", exist_ok=True)
-        await super()._preprocess(token=token, input_files=input_files)
+            os.makedirs(ROOT_DIR / f"data/docker/{self.image_name}/{_token}/out", exist_ok=True)
+        await super()._preprocess(_token=_token, _input_files=_input_files)
 
     async def _postprocess(
-        self, *, _output: str, token: uuid.UUID, mode: ChargeModeEnum, **_
+        self, *, _output: str, _token: uuid.UUID, mode: ChargeModeEnum, **_
     ) -> tuple[dict, list[str]]:
         if mode == ChargeModeEnum.info:
             parsed_data = self.parse_info_output(_output)
             return ChargeInfoResponseDto(**parsed_data).model_dump(), []
 
         elif mode == ChargeModeEnum.charges:
-            file_names = os.listdir(ROOT_DIR / f"data/docker/{self.image_name}/{token}/out")
-            user_file_dtos = await self._send_files(token=token, file_names=file_names)
+            file_names = os.listdir(ROOT_DIR / f"data/docker/{self.image_name}/{_token}/out")
+            user_file_dtos = await self._send_files(token=_token, file_names=file_names)
             files_data = self.get_file_data(user_file_dtos)
             file_hashes = [file_obj.file_name_hash for file_obj in user_file_dtos]
             return ChargeResponseDto(**files_data).model_dump(), file_hashes

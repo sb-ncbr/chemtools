@@ -1,5 +1,6 @@
 import os
 import re
+import uuid
 
 from conf.const import ROOT_DIR
 from tools.dockerized_tool_base import DockerizedToolBase
@@ -9,16 +10,16 @@ class GesamtTool(DockerizedToolBase):
     image_name = "gesamt"
     docker_run_kwargs = {"volumes": {os.path.abspath(ROOT_DIR / "data/docker/gesamt"): {"bind": "/data", "mode": "r"}}}
 
-    def _get_cmd_params(self, *, token: str, input_files: list[str], selection_strings: list[str], **_) -> str:
+    def _get_cmd_params(self, *, _token: uuid.UUID, _input_files: list[str], selection_strings: list[str], **_) -> str:
         result = " ".join(
             (f"-d {selection_string} " if selection_string is not None else "")
-            + os.path.abspath(f"/data/{token}/in/{file_name}")
-            for file_name, selection_string in zip(input_files, selection_strings)
+            + os.path.abspath(f"/data/{_token}/in/{file_name}")
+            for file_name, selection_string in zip(_input_files, selection_strings)
         )
         return result
 
-    async def _postprocess(self, *, input_files: list[str], _output: str, **_) -> tuple[dict, list[str]]:
-        if len(input_files) == 2:
+    async def _postprocess(self, *, _input_files: list[str], _output: str, **_) -> tuple[dict, list[str]]:
+        if len(_input_files) == 2:
             return self.parse_output_two_files(_output), []
         return self.parse_output_more_than_three_files(_output), []
 

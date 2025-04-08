@@ -43,6 +43,7 @@ In order to add a new tool, you need to:
 
 
 ## TODO
+
 - write how to create new tool
 - write about command injection (_get_cmd_args)
 - gesamt - podpora -s/-d \[kinda done\]

@@ -12,6 +12,7 @@ from db.repos.calculation_result_repo import CalculationResultRepo
 from services.file_cache_service import FileCacheService
 from services.message_broker_service import MessageBrokerService
 from services.pipeline_service import PipelineService
+from utils import rename_dict_special
 
 
 class CalculationService:
@@ -62,7 +63,7 @@ class CalculationService:
                 sequence_number=data.sequence_number,
                 input_files=input_files,
                 input_data=input_data_dict,
-                # TODO add user id
+                user_id=data.user_id,
             )
         )
         calculation_dto = CalculationRequestDto.model_validate(calculation)
@@ -76,7 +77,7 @@ class CalculationService:
             return TaskInfoResponseDto(info="Result cached from previous calculation", token=calculation_dto.id)
 
         await self.message_broker.send_calculation_message(
-            data=json.loads(calculation_dto.model_dump_json()),
+            data=json.loads(data),
             _queue=RabbitQueueEnum.pipeline_queue if calculation.pipeline_id else RabbitQueueEnum.free_queue,
         )
         return TaskInfoResponseDto(info="Calculation task enqueued", token=calculation_dto.id)

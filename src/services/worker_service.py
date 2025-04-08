@@ -44,8 +44,8 @@ class WorkerService:
         logger.info(f"Running '{dockerized_tool.image_name}' tool by user={calculation_dto.user_id}")
         try:
             result, output_files = await dockerized_tool.run(
-                token=calculation_dto.id,
-                input_files=calculation_dto.input_files,
+                _token=calculation_dto.id,
+                _input_files=calculation_dto.input_files,
                 user_id=calculation_dto.user_id,
                 **calculation_dto.input_data,
             )

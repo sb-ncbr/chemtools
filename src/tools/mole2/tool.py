@@ -19,22 +19,22 @@ class Mole2Tool(DockerizedToolBase):
         }
     }
 
-    def _get_cmd_params(self, *, token: uuid.UUID, **_) -> str:
-        return f"/data/{token}/in/mole_input.xml"
+    def _get_cmd_params(self, *, _token: uuid.UUID, **_) -> str:
+        return f"/data/{_token}/in/mole_input.xml"
 
-    async def _preprocess(self, *, token: str, input_files: list[str], **mole_data) -> None:
-        await super()._preprocess(token=token, input_files=input_files)
-        os.makedirs(ROOT_DIR / f"data/docker/{self.image_name}/{token}/out", exist_ok=True)
-        os.makedirs(ROOT_DIR / f"data/docker/{self.image_name}/{token}/zip", exist_ok=True)
+    async def _preprocess(self, *, _token: uuid.UUID, _input_files: list[str], **mole_data) -> None:
+        await super()._preprocess(_token=_token, _input_files=_input_files)
+        os.makedirs(ROOT_DIR / f"data/docker/{self.image_name}/{_token}/out", exist_ok=True)
+        os.makedirs(ROOT_DIR / f"data/docker/{self.image_name}/{_token}/zip", exist_ok=True)
         self.build_xml_from_data(
-            token=token,
-            input_path=f"/data/{token}/in/{input_files[0]}",
-            output_path=f"/data/{token}/out",
+            token=_token,
+            input_path=f"/data/{_token}/in/{_input_files[0]}",
+            output_path=f"/data/{_token}/out",
             data=MoleDto.model_validate(mole_data),
         )
 
-    async def _postprocess(self, *, _output: str, token: uuid.UUID, **_) -> tuple[dict, list[str]]:
-        calculation_dir = ROOT_DIR / f"data/docker/{self.image_name}/{token}"
+    async def _postprocess(self, *, _output: str, _token: uuid.UUID, **_) -> tuple[dict, list[str]]:
+        calculation_dir = ROOT_DIR / f"data/docker/{self.image_name}/{_token}"
         folder_to_zip = os.path.join(calculation_dir, "zip")
         zip_file = self.zip_folder_content(calculation_dir, "mole2_result.zip")
         [zip_hash] = [file_dto async for file_dto in self._file_storage_service.upload_files([zip_file], folder_to_zip)]
@@ -48,7 +48,7 @@ class Mole2Tool(DockerizedToolBase):
         return zip_name
 
     @staticmethod
-    def build_xml_from_data(token: str, input_path: str, output_path: str, data: MoleDto) -> None:
+    def build_xml_from_data(token: uuid.UUID, input_path: str, output_path: str, data: MoleDto) -> None:
         root = E.Tunnels(
             E.Input(input_path),
             E.WorkingDirectory(output_path),

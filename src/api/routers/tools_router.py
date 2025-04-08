@@ -44,7 +44,6 @@ for tool_name, tool_module in get_tool_modules("endpoints"):
             "data": CreateCalculationRequestDto[data_type],
             "return": TaskInfoResponseDto,
         }
-
         endpoint_func.__module__ = "api.routers.tools_router"
 
         setattr(

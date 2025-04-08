@@ -74,7 +74,7 @@ class DockerizedToolBase(abc.ABC):
         """
         return self.docker_run_kwargs
 
-    async def _preprocess(self, *, token: str, input_files: list[str], **_) -> None:
+    async def _preprocess(self, *, _token: uuid.UUID, _input_files: list[str], **_) -> None:
         """
         Preprocess the input files before running the dockerized tool.
 
@@ -85,12 +85,12 @@ class DockerizedToolBase(abc.ABC):
         Raises:
             ValueError: If neither input_file nor input_files is provided.
         """
-        if not input_files:
+        if not _input_files:
             raise ValueError("Either input_file or input_files must be provided")
 
-        os.makedirs(ROOT_DIR / f"data/docker/{self.image_name}/{token}/in", exist_ok=True)
+        os.makedirs(ROOT_DIR / f"data/docker/{self.image_name}/{_token}/in", exist_ok=True)
         await self._file_storage_service.download_files(
-            input_files, ROOT_DIR / f"data/docker/{self.image_name}/{token}/in"
+            _input_files, ROOT_DIR / f"data/docker/{self.image_name}/{_token}/in"
         )
 
     async def _postprocess(self, *, _output: str, **_) -> tuple[dict, list[str]]:
