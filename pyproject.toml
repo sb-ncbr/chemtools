@@ -42,6 +42,7 @@ mypy = "^1.14.1"
 pytest = "^8.3.4"
 lxml-stubs = "^0.5.1"
 types-docker = "^7.1.0.20241229"
+types-pyyaml = "^6.0.12.20250402"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from dependency_injector.wiring import Provide, inject
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from api.routers import router_list
 from conf.settings import AppSettings, PostgresSettings
@@ -26,6 +27,12 @@ def init_app(
     init_logging(app_settings)
     session_manager.init(db_settings.postgres_url)
     app = FastAPI(title="ChemtoolsAPI", version=get_project_version(), lifespan=lifespan)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     for app_router in router_list:
         app.include_router(app_router)
 

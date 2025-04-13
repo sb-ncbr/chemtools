@@ -1,6 +1,7 @@
 import abc
-from typing import TypeVar
+from typing import Type, TypeVar
 
+from pydantic import BaseModel
 from sqlalchemy import select
 
 from db.database import Base, DatabaseSessionManager
@@ -9,7 +10,7 @@ Entity = TypeVar("Entity", bound="Base")
 
 
 class BaseRepo(abc.ABC):
-    _model = None
+    _model: Type[BaseModel] | None = None
 
     def __init__(self, session_manager: DatabaseSessionManager):
         if self._model is None:
@@ -26,15 +27,15 @@ class BaseRepo(abc.ABC):
 
     async def get_list(self) -> list[Entity]:
         async with self.session_manager.session() as db:
-            return (await db.execute(select(self._model))).scalars().all()
+            return (await db.execute(select(self._model))).scalars().all()  # type: ignore
 
     async def get_by(self, **kwargs) -> list[Entity]:
         async with self.session_manager.session() as db:
-            return (await db.execute(select(self._model).filter_by(**kwargs))).scalars().first()
+            return (await db.execute(select(self._model).filter_by(**kwargs))).scalars().first()  # type: ignore
 
     async def filter_by(self, **kwargs) -> list[Entity]:
         async with self.session_manager.session() as db:
-            return (await db.execute(select(self._model).filter_by(**kwargs))).scalars().all()
+            return (await db.execute(select(self._model).filter_by(**kwargs))).scalars().all()  # type: ignore
 
     async def update(self, entity: Entity, **update_data) -> None:
         async with self.session_manager.session() as db:

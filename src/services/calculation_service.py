@@ -12,7 +12,6 @@ from db.repos.calculation_result_repo import CalculationResultRepo
 from services.file_cache_service import FileCacheService
 from services.message_broker_service import MessageBrokerService
 from services.pipeline_service import PipelineService
-from utils import rename_dict_special
 
 
 class CalculationService:
