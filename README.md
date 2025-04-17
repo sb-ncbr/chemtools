@@ -16,7 +16,7 @@ which is running the calculations inside the docker containers.
 ### Installation
 
 1. Copy `template.env` to `.env` and adjust environment variables as needed
-2. Run `poetry install` to install project locally for the worker
+2. Run `poetry install` to install project locally for the worker (Poetry >2.0 is required!)
 3. Run `docker compose up --build` to build the api along with needed services and start them
 4. Run `poetry run alembic upgrade head` to migrate database
 5. Setup MinIO locally by visiting `http://127.0.0.1:9001/access-keys`, creating access key and updating `.env` file accordingly. *You can skip this step if you store your data in filesystem (using `FilesystemStorageService`)*
@@ -43,6 +43,7 @@ In order to add a new tool, you need to:
 
 
 ## TODO
+- automatically pull all required tool docker images (which need to be pre-build) on worker startup
 
 - write how to create new tool
 - write about command injection (_get_cmd_args)

@@ -76,7 +76,7 @@ class CalculationService:
             return TaskInfoResponseDto(info="Result cached from previous calculation", token=calculation_dto.id)
 
         await self.message_broker.send_calculation_message(
-            data=json.loads(data),
+            data=json.loads(calculation_dto.model_dump_json()),
             _queue=RabbitQueueEnum.pipeline_queue if calculation.pipeline_id else RabbitQueueEnum.free_queue,
         )
         return TaskInfoResponseDto(info="Calculation task enqueued", token=calculation_dto.id)
