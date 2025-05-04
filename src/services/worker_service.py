@@ -46,7 +46,7 @@ class WorkerService:
             result, output_files = await dockerized_tool.run(
                 _token=calculation_dto.id,
                 _input_files=calculation_dto.input_files,
-                user_id=calculation_dto.user_id,
+                _user_id=calculation_dto.user_id,
                 **calculation_dto.input_data,
             )
             return CalculationStatusEnum.success, result, output_files

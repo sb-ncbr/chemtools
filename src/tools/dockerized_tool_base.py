@@ -133,9 +133,9 @@ class DockerizedToolBase(abc.ABC):
 
         Args:
             **kwargs: Keyword arguments to be passed to the tool.
-                - token: Unique identifier for the calculation.
-                - input_files: List of input files to be processed.
-                - user_id: Identifier of the user running the tool.
+                - _token: Unique identifier for the calculation.
+                - _input_files: List of input files to be processed.
+                - _user_id: Identifier of the user running the tool.
                 - **kwargs: Input data for the tool.
         Returns:
             tuple: A tuple containing the processed output and a list of output files.

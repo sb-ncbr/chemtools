@@ -1,5 +1,3 @@
-import logging
-
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, Request
 from fastapi_utils.cbv import cbv
@@ -9,8 +7,6 @@ from containers import AppContainer
 from services.calculation_service import CalculationService
 from tools.chargefw2.schema import ChargeModeEnum
 from utils import get_tool_modules
-
-logger = logging.getLogger(__name__)
 
 tools_router = APIRouter(tags=["Tools"])
 
