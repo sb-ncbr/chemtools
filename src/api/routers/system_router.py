@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi_utils.cbv import cbv
 
-from di_containers import AppContainer
 from services.healthcheck_service import HealthcheckService
 
 system_router = APIRouter(tags=["System"])

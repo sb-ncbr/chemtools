@@ -9,7 +9,6 @@ from fastapi_utils.cbv import cbv
 from api.enums import MoleculeFileExtensionEnum, MoleculeRepoSiteEnum
 from api.schemas.fetched_file import FetchOnlineFileRequestDto, FetchOnlineFileResponseDto
 from api.schemas.user_file import DownloadRequestDto, UploadRequestDto, UploadResponseDto, UserFileDto
-from di_containers import AppContainer
 from services.data_fetcher_service import DataFetcherService
 from services.file_cache_service import FileCacheService
 from services.file_storage_service import FileStorageService

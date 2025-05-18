@@ -30,7 +30,8 @@ class OnlineFileFetcherClient:
         await self.file_cache_service.create_fetched_file(data, file_name, file_name_hash)
         return False, file_name_hash
 
-    async def _download(self, full_url: str) -> dict:
+    async def _download(self, full_url: str) -> bytes:
+        raise Exception("oops, should not be here")
         logger.info(f"Downloading file from url={full_url}")
         async with httpx.AsyncClient() as client:
             response = await client.get(full_url)

@@ -7,8 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.routers import router_list
 from conf.settings import AppSettings, PostgresSettings
-from di_containers import AppContainer, TestContainer
 from db.database import DatabaseSessionManager
+from di_containers import AppContainer, TestContainer
 from utils import get_project_version, init_app_di, init_logging
 
 

@@ -6,7 +6,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi_utils.cbv import cbv
 
 from api.schemas.pipeline import CreatePipelineDto, PipelineDto
-from di_containers import AppContainer
 from services.pipeline_service import PipelineService
 
 logger = logging.getLogger(__name__)

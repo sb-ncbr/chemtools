@@ -21,8 +21,10 @@ class FileCacheService:
     async def create_fetched_file(
         self, file_data: FetchOnlineFileRequestDto, file_name: str, file_name_hash: str
     ) -> FetchedFileModel:
+        file_data_dict = file_data.model_dump()
+        file_data_dict.pop("force_download")
         return await self.fetched_file_repo.create(
-            FetchedFileModel(**file_data.model_dump(), file_name=file_name, file_name_hash=file_name_hash)
+            FetchedFileModel(**file_data_dict, file_name=file_name, file_name_hash=file_name_hash)
         )
 
     async def create_user_file(self, user_id: uuid.UUID | None, file_name: str, file_name_hash: str) -> UserFileModel:

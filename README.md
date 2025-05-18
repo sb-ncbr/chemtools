@@ -59,3 +59,6 @@ popisat, ze je mozne pouzivat filesystem / minio
 
 spomenut authentication
 fix citations so that there are no stupid contributors mentioned
+
+future work -> docker pull pre containery namiesto manualneho buildenia.
+github pipelines, automatic deployment, containerize worker, chunk file data for larger files.

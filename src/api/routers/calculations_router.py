@@ -6,7 +6,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi_utils.cbv import cbv
 
 from api.schemas.calculation import CalculationRequestDto
-from di_containers import AppContainer
 from services.calculation_service import CalculationService
 
 logger = logging.getLogger(__name__)

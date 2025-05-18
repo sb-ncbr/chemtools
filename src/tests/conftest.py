@@ -1,12 +1,10 @@
 import alembic.config
 import asyncpg
-from minio import Minio
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
-from app import app, init_app
+from app import init_app
 from db.database import DatabaseSessionManager
-from services.minio_storage_service import MinIOService
 from utils import init_app_di
 
 TEST_DB_NAME = "test_db"

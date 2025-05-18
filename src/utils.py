@@ -1,6 +1,5 @@
 import importlib
 import logging
-import os
 import pkgutil
 import tomllib
 from typing import TYPE_CHECKING, Any, Callable, Generator, Union
@@ -14,7 +13,7 @@ from conf.const import ROOT_DIR
 
 if TYPE_CHECKING:
     from conf.settings import BaseEnvSettings
-    from di_containers import WorkerContainer, AppContainer, TestContainer
+    from di_containers import AppContainer, TestContainer, WorkerContainer
 
 
 def load_yml(file_path: str):
