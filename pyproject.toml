@@ -1,6 +1,5 @@
 [project]
-name = "chemtools-manager"
-dynamic = [ "version" ]
+name = "chemtools"
 authors = [
     {name = "silox",email = "edruisl99@gmail.com"}
 ]
@@ -30,19 +29,23 @@ dependencies = [
 ]
 
 [tool.poetry]
-version = "0.3.0"
+version = "1.0.0"
 package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.9.0"
-mypy = "^1.14.1"
-pytest = "^8.3.4"
+ruff = "^0.11.10"
+mypy = "^1.15.0"
+pytest = "^8.3.5"
 lxml-stubs = "^0.5.1"
 types-docker = "^7.1.0.20241229"
 types-pyyaml = "^6.0.12.20250402"
+sqlalchemy-utils = "^0.41.2"
+pytest-asyncio = "^0.26.0"
+coverage = "^7.8.0"
+pytest-cov = "^6.1.1"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -61,3 +64,7 @@ line-length = 120
 # pylint - PLC, PLE, PLR, PLW
 select = ["F", "E", "W", "A", "I", "PLC", "PLE", "PLR", "PLW"]
 ignore = ["PLR0913", "PLR2004"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = "--cov=src --cov-branch --cov-report=term-missing:skip-covered"

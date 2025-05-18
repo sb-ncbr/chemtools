@@ -6,7 +6,7 @@ from aio_pika.patterns import JsonMaster
 from dependency_injector.wiring import Provide, inject
 
 from conf.settings import PostgresSettings, RabbitMQSettings, WorkerSettings
-from containers import WorkerContainer
+from di_containers import WorkerContainer
 from db.database import DatabaseSessionManager
 from services.worker_service import WorkerService
 from utils import get_project_version, init_logging, init_worker_di

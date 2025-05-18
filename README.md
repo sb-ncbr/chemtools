@@ -1,6 +1,6 @@
 # Chemtools Manager
 
-Backend for running calculations using biochemistry tools in separate docker containers.
+Backend for running calculations using bioinformatics tools in separate docker containers.
 It consists of the **API**, which serves as an entrypoint, and the **worker**,
 which is running the calculations inside the docker containers.
 
@@ -44,3 +44,18 @@ Follow these steps to add a new tool support:
 
 - When you make changes in database models, you need to create new alembic migration. Run `poetry run alembic revision --autogenerate -m <rev_name>`
 - To update changes use `poetry run alembic upgrade head`
+
+## TODO
+popisat charge, mole a gesamt - popisat charge mody, vsetky prepinace, pridat obrazky. 
+
+Co maju spolocne? -> vzikne z toho generalizacia. Toto spomenut v praci.
+- vzdy to berie mmcif/pdb/..., vystup sa da pouzit ako vstup...
+
+Viac popisat nejaku frontendovu aplikaciu, aby sa objasnili pipeliny. Najlepsie asi na konkretnom priklade.
+
+Spomenut poziadavky systemu. Napisat do redesigning the system, ake su poziadavky a popisat co to ma overall vediet. Requirements.
+
+popisat, ze je mozne pouzivat filesystem / minio
+
+spomenut authentication
+fix citations so that there are no stupid contributors mentioned

@@ -7,13 +7,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.routers import router_list
 from conf.settings import AppSettings, PostgresSettings
-from containers import AppContainer
+from di_containers import AppContainer, TestContainer
 from db.database import DatabaseSessionManager
 from utils import get_project_version, init_app_di, init_logging
 
 
 @inject
 def init_app(
+    container: AppContainer | TestContainer,
     app_settings: AppSettings = Provide[AppContainer.app_settings],
     db_settings: PostgresSettings = Provide[AppContainer.postgres_settings],
     session_manager: DatabaseSessionManager = Provide[AppContainer.session_manager],
@@ -27,6 +28,7 @@ def init_app(
     init_logging(app_settings)
     session_manager.init(db_settings.postgres_url)
     app = FastAPI(title="ChemtoolsAPI", version=get_project_version(), lifespan=lifespan)
+    app.container = container
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -39,8 +41,8 @@ def init_app(
     return app, app_settings
 
 
-init_app_di()
-app, app_settings = init_app()
+container = init_app_di()
+app, app_settings = init_app(container=container)
 
 if __name__ == "__main__":
     uvicorn.run(app, host=app_settings.APP_HOST, port=app_settings.APP_PORT)

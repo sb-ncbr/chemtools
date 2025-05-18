@@ -10,6 +10,7 @@ from db.database import DatabaseSessionManager
 from services.calculation_service import CalculationService
 from services.data_fetcher_service import DataFetcherService
 from services.file_cache_service import FileCacheService
+from services.filesystem_storage_service import FilesystemStorageService
 from services.healthcheck_service import HealthcheckService
 from services.message_broker_service import MessageBrokerService
 from services.minio_storage_service import MinIOService
@@ -68,6 +69,71 @@ class AppContainer(containers.DeclarativeContainer):
         MinIOService,
         file_cache_service=file_cache_service,
         minio_settings=minio_settings,
+    )
+    online_file_fetcher_client = providers.Singleton(
+        clients.OnlineFileFetcherClient, storage_service=file_storage_service, file_cache_service=file_cache_service
+    )
+    data_fetcher_service = providers.Singleton(DataFetcherService, fetcher_client=online_file_fetcher_client)
+    calculation_service = providers.Singleton(
+        CalculationService,
+        calculation_request_repo=calculation_request_repo,
+        calculation_result_repo=calculation_result_repo,
+        message_broker_service=message_broker_service,
+        file_cache_service=file_cache_service,
+        pipeline_service=pipeline_service,
+        app_settings=app_settings,
+    )
+
+
+class TestContainer(AppContainer):
+    app_settings = providers.Singleton(settings.AppSettings)
+    postgres_settings = providers.Singleton(settings.PostgresSettings)
+    minio_settings = providers.Singleton(settings.MinIOSettings)
+    rabbitmq_settings = providers.Singleton(settings.RabbitMQSettings)
+
+    session_manager = providers.Singleton(DatabaseSessionManager)
+
+    calculation_request_repo = providers.Singleton(
+        repos.CalculationRequestRepo,
+        session_manager=session_manager,
+    )
+    calculation_result_repo = providers.Singleton(
+        repos.CalculationResultRepo,
+        session_manager=session_manager,
+    )
+    pipeline_repo = providers.Singleton(
+        repos.PipelineRepo,
+        session_manager=session_manager,
+    )
+    user_file_repo = providers.Singleton(
+        repos.UserFileRepo,
+        session_manager=session_manager,
+    )
+    fetched_file_repo = providers.Singleton(
+        repos.FetchedFileRepo,
+        session_manager=session_manager,
+    )
+
+    health_check_service = providers.Singleton(
+        HealthcheckService,
+        postgres_settings=postgres_settings,
+        rabbitmq_settings=rabbitmq_settings,
+        minio_settings=minio_settings,
+    )
+    file_cache_service = providers.Singleton(
+        FileCacheService, user_file_repo=user_file_repo, fetched_file_repo=fetched_file_repo
+    )
+    message_broker_service = providers.Singleton(
+        MessageBrokerService,
+        rabbitmq_settings=rabbitmq_settings,
+    )
+    pipeline_service = providers.Singleton(
+        PipelineService,
+        pipeline_repo=pipeline_repo,
+    )
+    file_storage_service = providers.Singleton(
+        FilesystemStorageService,
+        file_cache_service=file_cache_service,
     )
     online_file_fetcher_client = providers.Singleton(
         clients.OnlineFileFetcherClient, storage_service=file_storage_service, file_cache_service=file_cache_service

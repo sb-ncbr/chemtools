@@ -10,6 +10,10 @@ from services.file_storage_service import FileStorageService
 
 class MinIOService(FileStorageService):
     def __init__(self, minio_settings: MinIOSettings, file_cache_service: FileCacheService):
+        print('hooooooooooooo')
+        print('hooooooooooooo')
+        print('hooooooooooooo')
+        print('hooooooooooooo')
         super().__init__(file_cache_service)
         self.client = Minio(
             endpoint=minio_settings.minio_endpoint,

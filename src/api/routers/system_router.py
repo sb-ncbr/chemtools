@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi_utils.cbv import cbv
 
-from containers import AppContainer
+from di_containers import AppContainer
 from services.healthcheck_service import HealthcheckService
 
 system_router = APIRouter(tags=["System"])
@@ -21,7 +21,7 @@ class SystemRouter:
     async def index(self, request: Request):
         return f"""
         <html>
-            <h1>Chemtools Manager root</h1>
+            <h1>Chemtools root</h1>
             <a href="{request.url}docs">Try API here</a>
         </html>
         """

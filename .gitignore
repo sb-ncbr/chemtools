@@ -1,8 +1,10 @@
-.mypy_cache
-.ruff_cache
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
 .venv/
 __pycache__/
 .env
 data/
 *.log
 .DS_STORE
+.coverage

@@ -94,4 +94,9 @@ def downgrade() -> None:
     op.drop_table("pipelines")
     op.drop_table("fetched_files")
     op.drop_table("calculation_results")
+
+    # Manually drop the enum types
+    sa.Enum(name="moleculerepositeenum").drop(op.get_bind())
+    sa.Enum(name="moleculefileextensionenum").drop(op.get_bind())
+    sa.Enum(name="calculationstatusenum").drop(op.get_bind())
     # ### end Alembic commands ###

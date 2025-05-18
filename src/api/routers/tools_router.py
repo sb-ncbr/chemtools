@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi_utils.cbv import cbv
 
 from api.schemas.calculation import CreateCalculationRequestDto, TaskInfoResponseDto
-from containers import AppContainer
+from di_containers import AppContainer
 from services.calculation_service import CalculationService
 from tools.chargefw2.schema import ChargeModeEnum
 from utils import get_tool_modules

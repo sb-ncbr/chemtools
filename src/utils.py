@@ -1,8 +1,9 @@
 import importlib
 import logging
+import os
 import pkgutil
 import tomllib
-from typing import TYPE_CHECKING, Any, Callable, Generator
+from typing import TYPE_CHECKING, Any, Callable, Generator, Union
 from zipfile import ZipFile
 
 import yaml
@@ -13,6 +14,7 @@ from conf.const import ROOT_DIR
 
 if TYPE_CHECKING:
     from conf.settings import BaseEnvSettings
+    from di_containers import WorkerContainer, AppContainer, TestContainer
 
 
 def load_yml(file_path: str):
@@ -47,10 +49,11 @@ def get_tool_modules(module_type: str) -> Generator[tuple[str, Callable], None, 
             continue
 
 
-def init_app_di() -> None:
-    from containers import AppContainer
+def init_app_di(test: bool = False) -> Union["AppContainer", "TestContainer"]:
+    from di_containers import AppContainer, TestContainer
 
-    container = AppContainer()
+    container = AppContainer() if not test else TestContainer()
+    print(f"Container: {container.__class__.__name__}")
     container.wire(
         modules=[
             "__main__",
@@ -60,13 +63,14 @@ def init_app_di() -> None:
             "api.routers.tools_router",
             "api.routers.calculations_router",
             "api.routers.pipelines_router",
-            "containers",
+            "di_containers",
         ]
     )
+    return container
 
 
-def init_worker_di() -> None:
-    from containers import WorkerContainer
+def init_worker_di() -> "WorkerContainer":
+    from di_containers import WorkerContainer
 
     container = WorkerContainer()
     container.wire(
@@ -74,6 +78,7 @@ def init_worker_di() -> None:
             "__main__",
         ]
     )
+    return container
 
 
 def init_logging(settings: "BaseEnvSettings") -> None:
