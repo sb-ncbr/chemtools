@@ -20,14 +20,14 @@ async def test_file_user_upload_download(client):
     assert response.status_code == 200
     file_hash1, file_hash2 = response.json()["files"]
 
-    assert FileStorageService.get_file_hash(file_content1) == file_hash1
-    assert FileStorageService.get_file_hash(file_content2) == file_hash2
+    assert FileStorageService.get_file_hash(file_content1) == file_hash1.removesuffix(".txt")
+    assert FileStorageService.get_file_hash(file_content2) == file_hash2.removesuffix(".txt")
 
     response = await client.get(
         "/files",
         params={
             "user_id": user_id,
-            "files": [file_hash1, file_hash2],
+            "file_names": [file_hash1, file_hash2],
         },
     )
     assert response.status_code == 200

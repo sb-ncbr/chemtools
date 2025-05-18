@@ -68,3 +68,4 @@ ignore = ["PLR0913", "PLR2004"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 addopts = "--cov=src --cov-branch --cov-report=term-missing:skip-covered"
+log_level = "INFO"

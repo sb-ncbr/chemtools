@@ -17,7 +17,7 @@ calculations_router = APIRouter(tags=["Calculations"])
 @cbv(calculations_router)
 class CalculationsRouter:
     @inject
-    def __init__(self, calculation_service: CalculationService = Depends(Provide[AppContainer.calculation_service])):
+    def __init__(self, calculation_service: CalculationService = Depends(Provide["calculation_service"])):
         self.calculation_service = calculation_service
 
     @calculations_router.get("/calculation/{calculation_id}")

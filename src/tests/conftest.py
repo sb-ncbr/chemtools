@@ -1,10 +1,12 @@
 import alembic.config
 import asyncpg
+from minio import Minio
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
 from app import app, init_app
 from db.database import DatabaseSessionManager
+from services.minio_storage_service import MinIOService
 from utils import init_app_di
 
 TEST_DB_NAME = "test_db"
@@ -13,8 +15,9 @@ SYNC_TEST_DB_URL = ASYNC_TEST_DB_URL.replace("+asyncpg", "")
 
 
 @pytest_asyncio.fixture(autouse=True)
-def override_db_name(monkeypatch):
+def override_env_vars(monkeypatch):
     monkeypatch.setenv("POSTGRES_DB", TEST_DB_NAME)
+    monkeypatch.setenv("MINIO_BUCKET", "test-bucket")
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)

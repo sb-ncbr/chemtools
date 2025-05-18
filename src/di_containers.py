@@ -154,6 +154,7 @@ class WorkerContainer(containers.DeclarativeContainer):
     worker_settings = providers.Singleton(settings.WorkerSettings)
     postgres_settings = providers.Singleton(settings.PostgresSettings)
     rabbitmq_settings = providers.Singleton(settings.RabbitMQSettings)
+    minio_settings = providers.Singleton(settings.MinIOSettings)
 
     docker = providers.Singleton(docker.from_env)
 
@@ -181,7 +182,7 @@ class WorkerContainer(containers.DeclarativeContainer):
     )
     file_storage_service = providers.Singleton(
         MinIOService,
-        minio_settings=AppContainer.minio_settings,
+        minio_settings=minio_settings,
         file_cache_service=file_cache_service,
     )
 

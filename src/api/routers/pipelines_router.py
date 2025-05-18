@@ -17,7 +17,7 @@ pipelines_router = APIRouter(tags=["Pipelines"])
 @cbv(pipelines_router)
 class PipelinesRouter:
     @inject
-    def __init__(self, pipeline_service: PipelineService = Depends(Provide[AppContainer.pipeline_service])):
+    def __init__(self, pipeline_service: PipelineService = Depends(Provide["pipeline_service"])):
         self.pipeline_service = pipeline_service
 
     @pipelines_router.get("/pipeline/{pipeline_id}")

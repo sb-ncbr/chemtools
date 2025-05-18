@@ -13,7 +13,7 @@ tools_router = APIRouter(tags=["Tools"])
 
 class ToolsRouter:
     @inject
-    def __init__(self, calculation_service: CalculationService = Depends(Provide[AppContainer.calculation_service])):
+    def __init__(self, calculation_service: CalculationService = Depends(Provide["calculation_service"])):
         self.calculation_service = calculation_service
 
     @tools_router.get("/chargefw2")

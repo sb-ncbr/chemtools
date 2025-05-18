@@ -15,9 +15,9 @@ from utils import get_project_version, init_app_di, init_logging
 @inject
 def init_app(
     container: AppContainer | TestContainer,
-    app_settings: AppSettings = Provide[AppContainer.app_settings],
-    db_settings: PostgresSettings = Provide[AppContainer.postgres_settings],
-    session_manager: DatabaseSessionManager = Provide[AppContainer.session_manager],
+    app_settings: AppSettings = Provide["app_settings"],
+    db_settings: PostgresSettings = Provide["postgres_settings"],
+    session_manager: DatabaseSessionManager = Provide["session_manager"],
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(_: FastAPI):

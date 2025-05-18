@@ -14,7 +14,7 @@ system_router = APIRouter(tags=["System"])
 @cbv(system_router)
 class SystemRouter:
     @inject
-    def __init__(self, health_check_service: HealthcheckService = Depends(Provide[AppContainer.health_check_service])):
+    def __init__(self, health_check_service: HealthcheckService = Depends(Provide["health_check_service"])):
         self.health_check_service = health_check_service
 
     @system_router.get("/", response_class=HTMLResponse, include_in_schema=False)

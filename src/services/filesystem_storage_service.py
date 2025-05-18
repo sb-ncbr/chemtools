@@ -14,10 +14,6 @@ class FilesystemStorageService(FileStorageService):
     _DATA_DIR = ROOT_DIR / "data/file_storage"
 
     def __init__(self, file_cache_service: FileCacheService):
-        print("hiiiiiiii")
-        print("hiiiiiiii")
-        print("hiiiiiiii")
-        print("hiiiiiiii")
         super().__init__(file_cache_service)
         if not os.path.exists(self._DATA_DIR):
             os.makedirs(self._DATA_DIR, exist_ok=True)

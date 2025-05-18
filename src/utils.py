@@ -53,7 +53,6 @@ def init_app_di(test: bool = False) -> Union["AppContainer", "TestContainer"]:
     from di_containers import AppContainer, TestContainer
 
     container = AppContainer() if not test else TestContainer()
-    print(f"Container: {container.__class__.__name__}")
     container.wire(
         modules=[
             "__main__",

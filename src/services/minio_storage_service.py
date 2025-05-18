@@ -10,10 +10,6 @@ from services.file_storage_service import FileStorageService
 
 class MinIOService(FileStorageService):
     def __init__(self, minio_settings: MinIOSettings, file_cache_service: FileCacheService):
-        print('hooooooooooooo')
-        print('hooooooooooooo')
-        print('hooooooooooooo')
-        print('hooooooooooooo')
         super().__init__(file_cache_service)
         self.client = Minio(
             endpoint=minio_settings.minio_endpoint,
@@ -46,3 +42,10 @@ class MinIOService(FileStorageService):
             return response.read()
         except S3Error as e:
             raise RuntimeError(f"Failed to fetch file: {e}")
+
+    async def delete_bucket(self, bucket: str) -> None:
+        if self.client.bucket_exists(bucket):
+            objects = self.client.list_objects(bucket, recursive=True)
+            for obj in objects:
+                self.client.remove_object(bucket, obj.object_name)
+            self.client.remove_bucket(bucket)

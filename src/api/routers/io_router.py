@@ -22,9 +22,9 @@ class IORouter:
     @inject
     def __init__(
         self,
-        storage_service: FileStorageService = Depends(Provide[AppContainer.file_storage_service]),
-        fetcher_service: DataFetcherService = Depends(Provide[AppContainer.data_fetcher_service]),
-        file_cache_service: FileCacheService = Depends(Provide[AppContainer.file_cache_service]),
+        storage_service: FileStorageService = Depends(Provide["file_storage_service"]),
+        fetcher_service: DataFetcherService = Depends(Provide["data_fetcher_service"]),
+        file_cache_service: FileCacheService = Depends(Provide["file_cache_service"]),
     ):
         self.storage_service = storage_service
         self.fetcher_service = fetcher_service

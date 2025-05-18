@@ -13,7 +13,6 @@ class DatabaseSessionManager:
         self._sessionmaker: async_sessionmaker | None = None
 
     def init(self, db_url: str):
-        print(f"Initializing DatabaseSessionManager with URL: {db_url}")
         self._engine = create_async_engine(db_url)
         self._sessionmaker = async_sessionmaker(bind=self._engine)
 
